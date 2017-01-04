@@ -69,18 +69,30 @@ int main(int argc, char const *argv[])
     int optarg2 = 0;
 
     for (i = 1; i < argc; i++){  /* Skip argv[0] (program name). */
-        if (strcmp(argv[i], "--setwidth") == 0){  /* Process optional arguments. */
+    	if (strcmp(argv[i], "--getwidth") == 0){  
+            get_width(filename);
+        }
+        else if (strcmp(argv[i], "--getheight") == 0){  
+            get_height(filename);
+        }
+        else if (strcmp(argv[i], "--getobjects") == 0){  
+            get_objects(filename);
+        }
+        else if (strcmp(argv[i], "--getinfo") == 0){  
+            get_info(filename);
+        }
+        else if (strcmp(argv[i], "--setwidth") == 0){  /* Process optional arguments. */
             if (i + 2 <= argc - 1){  /* There are enough arguments in argv. */
     			++i;
                 unsigned w = atoi(argv[i]);  /* Convert string to int. */
                 set_width(filename, w);
             }
             else{
-                perror("Please insert a width.\n")
+                perror("Please insert a width.\n");
             }
         }
         else if (strcmp(argv[i], "--setheight") == 0){  
-            if (i + 2 <= argc - 1 /* ET EST UN INT*/){ 
+            if (i + 2 <= argc - 1){ 
             	++i; 
                 unsigned h = atoi(argv[i]);
                 set_height(filename, h);
@@ -92,9 +104,9 @@ int main(int argc, char const *argv[])
         /*else if (strcmp(argv[i], "--setobjects") == 0){  
             if (i + 7 <= argc - 1 ET AUTRE TRUCS){
             	++i;  
-                char* filename = argv[i];
+                char* file = argv[i];
                 ++i;
-                unsigned nb_frames = argv[i];
+                int nb_frames = argv[i];
                 ++i;
                 int solidity = argv[i];
                 ++i;
@@ -103,9 +115,10 @@ int main(int argc, char const *argv[])
                 int collectible = argv[i];
                 ++i;
                 int generator = argv[i];
+                set_objects(file, nb_frames, solidity, destructible, collectible, generator);
             }
             else{
-                perror("Please insert a height.\n")
+                perror("Please insert the correct arguments.\n")
             }
         }*/
     }
