@@ -33,6 +33,13 @@ void get_info(char* filename){
 	printf("Height : %u, Width : %u, Objects : %u.\n", get_height(filename), get_width(filename), get_objects(filename));
 }
 
+void set_height(char* filename, unsigned height){
+	int fd = open(filename, O_WRONLY, 777);
+	write(fd, &height, sizeof(unsigned));
+}
+
+
+
 
 /*fichier passé en argument*/
 int main(int argc, char const *argv[])
