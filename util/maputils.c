@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
+
 
 
 unsigned get_height(char* filename){
@@ -53,22 +55,9 @@ int main(int argc, char const *argv[])
 		exit(1);
 	}	
 	char * filename = argv[1];
-	get_info(filename);
 
 	/*12 32 1*/
-	set_width(filename, 30);
-	set_height(filename, 10);
-	printf("*****************\n");
-	get_info(filename);
-
-	pritnf("***************\n");
-
-	int i;
-    int opt = 0;
-    int optarg1 = 0;
-    int optarg2 = 0;
-
-    for (i = 1; i < argc; i++){  /* Skip argv[0] (program name). */
+    for (int i = 1; i < argc; i++){  /* Skip argv[0] (program name). */
     	if (strcmp(argv[i], "--getwidth") == 0){  
             get_width(filename);
         }
@@ -82,7 +71,7 @@ int main(int argc, char const *argv[])
             get_info(filename);
         }
         else if (strcmp(argv[i], "--setwidth") == 0){  /* Process optional arguments. */
-            if (i + 2 <= argc - 1){  /* There are enough arguments in argv. */
+            if (i + 1 <= argc - 1){  /* There are enough arguments in argv. */
     			++i;
                 unsigned w = atoi(argv[i]);  /* Convert string to int. */
                 set_width(filename, w);
@@ -92,17 +81,17 @@ int main(int argc, char const *argv[])
             }
         }
         else if (strcmp(argv[i], "--setheight") == 0){  
-            if (i + 2 <= argc - 1){ 
+            if (i + 1 <= argc - 1){ 
             	++i; 
                 unsigned h = atoi(argv[i]);
                 set_height(filename, h);
             }
             else{
-                perror("Please insert a height.\n")
+                perror("Please insert a height.\n");
             }
         }
         /*else if (strcmp(argv[i], "--setobjects") == 0){  
-            if (i + 7 <= argc - 1 ET AUTRE TRUCS){
+            if (i + 6 <= argc - 1 ET AUTRE TRUCS){
             	++i;  
                 char* file = argv[i];
                 ++i;
@@ -122,6 +111,7 @@ int main(int argc, char const *argv[])
             }
         }*/
     }
+    //get_info(filename);
 	return 0;
 }
 
