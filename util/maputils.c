@@ -5,6 +5,14 @@ unsigned get_height(char* filename){
 	return height;
 }
 
+unsigned get_width(char* filename){
+	int fd = open(filename, O_RDONLY);
+	unsigned width = 0;
+	lseek(fd, sizeof(usigned), SEEK_SET);
+	int r = read(fd, &width, sizeof(usigned));
+	return width;
+}
+
 /*fichier passé en argument*/
 int main(int argc, char const *argv[])
 {
