@@ -15,11 +15,10 @@ void map_new (unsigned width, unsigned height)
 
   for (int x = 0; x < width; x++){
     map_set (x, height - 1, 0); // Ground
-    //mettre les fleurs
     if ( x%4==0 && x!=0)
-      map_set(x,height-2,4);
+      map_set(x,height-2,4); //flower
     if ( x%6==0 && x!=0)
-      map_set(x,height-3,5);
+      map_set(x,height-3,5); //pieces
   }
 for (int y = 0; y < height - 1; y++) {
     map_set (0, y, 1); // Wall
@@ -53,7 +52,7 @@ void map_save (char *filename)
 {
   // TODO
   /*fprintf (stderr, "Sorry: Map save is not yet implemented\n");*/
-  int fd = open(filename,O_CREAT | O_TRUNC | O_WRONLY, 740);
+  int fd = open(filename,O_CREAT | O_TRUNC | O_WRONLY, 777);
   unsigned height = map_height();
   unsigned width = map_width();
   write(fd, &height, sizeof(height));
@@ -61,8 +60,8 @@ void map_save (char *filename)
   
   for (int y = 0; y < height; y++){
     for(int x = 0; x < width; x++){
-      int donnee = map_get(x,y);
-      write(fd, &donnee, sizeof(donnee));
+      int data = map_get(x,y);
+      write(fd, &data, sizeof(data));
     }
   }
   close(fd);
