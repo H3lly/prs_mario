@@ -60,13 +60,59 @@ int main(int argc, char const *argv[])
 	set_height(filename, 10);
 	printf("*****************\n");
 	get_info(filename);
+
+	pritnf("***************\n");
+
+	int i;
+    int opt = 0;
+    int optarg1 = 0;
+    int optarg2 = 0;
+
+    for (i = 1; i < argc; i++){  /* Skip argv[0] (program name). */
+        if (strcmp(argv[i], "--setwidth") == 0){  /* Process optional arguments. */
+            if (i + 2 <= argc - 1){  /* There are enough arguments in argv. */
+    			++i;
+                unsigned w = atoi(argv[i]);  /* Convert string to int. */
+                set_width(filename, w);
+            }
+            else{
+                perror("Please insert a width.\n")
+            }
+        }
+        else if (strcmp(argv[i], "--setheight") == 0){  
+            if (i + 2 <= argc - 1 /* ET EST UN INT*/){ 
+            	++i; 
+                unsigned h = atoi(argv[i]);
+                set_height(filename, h);
+            }
+            else{
+                perror("Please insert a height.\n")
+            }
+        }
+        /*else if (strcmp(argv[i], "--setobjects") == 0){  
+            if (i + 7 <= argc - 1 ET AUTRE TRUCS){
+            	++i;  
+                char* filename = argv[i];
+                ++i;
+                unsigned nb_frames = argv[i];
+                ++i;
+                int solidity = argv[i];
+                ++i;
+                int destructible = argv[i];
+                ++i;
+                int collectible = argv[i];
+                ++i;
+                int generator = argv[i];
+            }
+            else{
+                perror("Please insert a height.\n")
+            }
+        }*/
+    }
 	return 0;
 }
 
 /*
-set_width()
-set_height()
-
 set_objects(file, nb_frames, solidity, destructible, collectible, generator)
 prune_objects()
 
