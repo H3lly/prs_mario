@@ -1,3 +1,16 @@
+unsigned get_height(char* filename){
+	int fd = open(filename, O_RDONLY);
+	unsigned height = 0;
+	int r = read(fd, &height, sizeof(usigned));
+	return height;
+}
+
+/*fichier passé en argument*/
+int main(int argc, char const *argv[])
+{
+	
+	return 0;
+}
 
 /*
 get_width()
