@@ -75,6 +75,14 @@ int main(int argc, char const *argv[])
     			++i;
                 unsigned w = atoi(argv[i]);  /* Convert string to int. */
                 set_width(filename, w);
+                int descr[2];
+                pipe(descr);
+                int fd = open(filename, O_WRONLY);
+                unsigned height, width,nb_objects;
+                r = read(fd, &height, sizeof(height));
+                r = read(fd, &width, sizeof(width));
+                r = read(fd, &nb_objects,sizeof(nb_objects));
+
             }
             else{
                 perror("Please insert a width.\n");
