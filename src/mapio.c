@@ -55,9 +55,10 @@ void map_save (char *filename)
   int fd = open(filename,O_CREAT | O_TRUNC | O_WRONLY, 777);
   unsigned height = map_height();
   unsigned width = map_width();
+  unsigned nb_objects = map_objects();
   write(fd, &height, sizeof(height));
   write(fd, &width, sizeof(width));
-  
+  write(fd, &nb_objects, sizeof(nb_objects));
   for (int y = 0; y < height; y++){
     for(int x = 0; x < width; x++){
       int data = map_get(x,y);
@@ -71,10 +72,11 @@ void map_load (char *filename)
 {
   
 int load = open(filename, O_RDONLY);
-  unsigned height, width;
+  unsigned height, width,nb_objects;
   int r, type;
   r = read(load, &height, sizeof(height));
   r = read(load, &width, sizeof(width));
+  r = read(load, &nb_objects,sizeof(nb_objects));
   map_allocate (width, height);
   for(int y=0; y<height; y++){
     for(int x=0; x<width; x++){
