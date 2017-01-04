@@ -13,19 +13,26 @@ unsigned get_width(char* filename){
 	return width;
 }
 
+unsigned get_objects(char* filename){
+	int fd = open(filename, O_RDONLY);
+	unsigned objects = 0;
+	lseek(fd, 2*sizeof(usigned), SEEK_SET);
+	int r = read(fd, &objects, sizeof(usigned));
+	return objects;
+}
+
+void get_info(char* filename){
+	printf("Height : %u, Width : %u, Obects : %u.\n", get_height(filename), get_width(filename), get_object(filename));
+}
+
+
 /*fichier passé en argument*/
 int main(int argc, char const *argv[])
 {
-	
 	return 0;
 }
 
 /*
-get_width()
-get_height()
-get_objects() //nb objets contenus
-get_info() //affiche toutes les informations (facile...)
-
 set_width()
 set_height()
 
