@@ -38,7 +38,11 @@ void set_height(char* filename, unsigned height){
 	write(fd, &height, sizeof(unsigned));
 }
 
-
+void set_width(char* filename, unsigned width){
+	int fd = open(filename, O_WRONLY, 777);
+	lseek(fd, sizeof(unsigned), SEEK_SET);
+	write(fd, &width, sizeof(unsigned));
+}
 
 
 /*fichier passé en argument*/
