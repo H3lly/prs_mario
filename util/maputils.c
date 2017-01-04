@@ -49,12 +49,17 @@ void set_width(char* filename, unsigned width){
 int main(int argc, char const *argv[])
 {
 	if(argc<1){
-		perror("not enough parameters");
+		perror("not enough parameters\n");
 		exit(1);
 	}	
 	char * filename = argv[1];
 	get_info(filename);
 
+	/*12 32 1*/
+	set_width(filename, 30);
+	set_height(filename, 10);
+	printf("*****************\n");
+	get_info(filename);
 	return 0;
 }
 
