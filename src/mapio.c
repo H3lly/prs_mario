@@ -9,6 +9,13 @@
 
 #ifdef PADAWAN
 
+void assert(int cond, char * msg){
+  if(!cond){
+    perror(msg);
+    exit(1);
+  }
+}
+
 void map_new (unsigned width, unsigned height)
 {
   map_allocate (width, height);
@@ -55,20 +62,29 @@ void map_save (char *filename)
       int data = map_get(x,y);
       write(fd, &data, sizeof(data));
     }
-  }
+  } 
+
+
+
+  
   // ############################################# À VÉRIFIER ##############################################
-  int objects = open("../util/objets.txt", O_RDONLY);
+  char * obj = "util/objets.txt";
+  int objects = open(obj, O_RDONLY);
+  assert(objects!=-1, "Le open ne marche pas.");
   lseek(objects, 1, SEEK_SET);
   int r = 1;
   char c;
   int cpt = 0;
+
   while(r >=1){ //tant qu'on est pas à la fin du fichier
     cpt = 0;
     r = read(objects, &c, sizeof(char));
     while(c!='\"'){
       cpt++;
       r = read(objects, &c, sizeof(char));
+      assert(r!=-1, "le read ligne 83 ne fonctionne pas.");
     }
+    }/*
     //cpt--;//vérifier si on est pas décalé ! on en a peut-être pas besoin en fait
     
     lseek(objects, cpt*-1, SEEK_SET); //on reviens à la position avant qu'on compte le nombre de charactere
@@ -159,6 +175,7 @@ void map_save (char *filename)
     else
       lseek(objects, 13, SEEK_SET);
   }
+  */
   //FAIRE hexdump -c objects.txt
   close(fd);
 }
