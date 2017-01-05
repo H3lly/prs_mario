@@ -106,15 +106,17 @@ void map_save (char *filename)
       cpt++;
     }
 
-    
+    char str[6];
     lseek(objects, cpt*-1 -1, SEEK_CUR); //on le remet où il était
     for(int i =0 ; i<cpt ; ++i){
       read(objects, &c, 1);
-      printf("FOR c = %c\n", c);
-      write(map_blocks, &c, 1);
+      strncat(str,&c,1);
     }    
-    exit(1);
+    int n = atoi(str);
+    write(map_blocks, &n, sizeof(int));
 
+    //CA MARCHE JUSQU'ICI HEIN !!!!
+    
     //la on vient d'écrire le nombre de frames. Youhou.
     lseek(objects, 1, SEEK_CUR); //on saute la tabulation
 
