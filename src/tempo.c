@@ -25,14 +25,22 @@ static unsigned long get_time (void)
 #ifdef PADAWAN
 
 //structure-liste qui va contenir les events
-typedef struct list_events
+typedef struct linked_list
 {
   struct itimerval timer; //temporisateur
   void *param;  // sauvegarde de param
-  unsigned long start_timer;   // de 0 à 4294967295, correspond au temps où le temporisateur est armé
-  struct list_events *suiv; // un pointeur vers le prochain event
-} list_events;
-
+  unsigned long time_signal;   // de 0 à 4294967295, correspond au temps où le signal SIGALRM est généré
+  struct linked_list *suiv; // un pointeur vers le prochain event
+} linked_list;
+/*
+void insert(linked_list **ll)
+{
+  linked_list *tmp = NULL;
+  linked_list *cll = *ll)
+  
+}
+*/
+linked_list *first_event = NULL; // création de la liste chaînée
 
 void handler(int sig)
 {
@@ -78,16 +86,21 @@ int timer_init (void)
 
 void timer_set (Uint32 delay, void *param)
 {
-
-  struct itimerval timer;
+  linked_list *event = malloc(sizeof(struct linked_list));  // création de la structure de l'event
+  
   // configure le timer pour expirer après delay msec...
-  timer.it_value.tv_sec = 0;
-  timer.it_value.tv_usec = delay;
+  event->timer.it_value.tv_sec = delay/1000000;       // secondes
+  event->timer.it_value.tv_usec = (delay%1000000);    // microsecondes
   // ... et seulement 1 fois
-  timer.it_interval.tv_sec = 0;
-  timer.it_interval.tv_usec = 0;
+  event->timer.it_interval.tv_sec = 0;
+  event->timer.it_interval.tv_usec = 0;
+
+  event->param = param;
+
+  event->time_signal = get_time() + delay;
+
   // enclenche le timer
-  setitimer(ITIMER_REAL, &timer, NULL);
+  setitimer(ITIMER_REAL, &(event->timer), NULL);
 }
 
 #endif
@@ -95,4 +108,4 @@ void timer_set (Uint32 delay, void *param)
 // Création de la structure-liste : ok !
 // méthodes d'accès, d'insertion, de suppression à implémenter
 // timer_set à modifier en fonction de la structure --> ne pas oublier l'allocation de la structure et de l'ajouter à la liste chaînée
-// création de la liste chainée de base
+// création de la liste chainée de base : ok !
