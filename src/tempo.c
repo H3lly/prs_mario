@@ -24,24 +24,25 @@ static unsigned long get_time (void)
 }
 
 #ifdef PADAWAN
-/*
+
+void *param_event;
+
 void handler(int sig){
   printf("L'identité du thread courant est : %d\n", pthread_self());
+  //printf("sdl_push_event(%p) appelée au temps %ld\n", param_event, get_time ());
 }
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
 void *daemon(void *arg){
-
   struct itimerval timer;
-  // configure le timer pour expire après 250msec...
+  // configure le timer pour expirer après 250msec...
   timer.it_value.tv_sec = 0;
   timer.it_value.tv_usec = 250000;
   // ... et toutes les 250 msec
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 250000;
-  // enclenche le timer virtuel
+  // enclenche le timer
   setitimer(ITIMER_REAL, &timer, NULL);
-
 
   sigset_t mask;  // masque de blocage de signaux 
   sigfillset(&mask);  // ajoute tous les signaux possibles au masque
@@ -59,11 +60,11 @@ void *daemon(void *arg){
   }
   
 }
-*/
+
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-/*
+
   sigset_t mask;  // masque de blocage de signaux 
   sigemptyset(&mask); // création d'un masque vide
   sigaddset(&mask, SIGALRM);  //on ajoute le signal SIGALRM au masque
@@ -75,25 +76,25 @@ int timer_init (void)
     perror("pthread_create");
     return EXIT_FAILURE;
   }
-  pthread_join(thread, NULL); // attend la fin du thread
-*/
+  //pthread_join(thread, NULL); // attend la fin du thread
+
   return 0; // Implementation not ready
 }
 
 void timer_set (Uint32 delay, void *param)
 {
   /*
-  // TODO
-  void *param_event
+  // sauvegarde de param
+  param_event = param;
 
   struct itimerval timer;
-  // configure le timer pour expire après delay msec...
+  // configure le timer pour expirer après delay msec...
   timer.it_value.tv_sec = 0;
   timer.it_value.tv_usec = delay;
-  // ... et toutes les 250 msec
+  // ... et seulement 1 fois
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 0;
-  // enclenche le timer virtuel
+  // enclenche le timer
   setitimer(ITIMER_REAL, &timer, NULL);
   */
 }
