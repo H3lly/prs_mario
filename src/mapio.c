@@ -72,6 +72,7 @@ void map_save (char *filename)
   char c;
   int cpt = 0;
   while(r >=1){ //tant qu'on est pas à la fin du fichier
+    cpt = 0;
     r = read(objects, &c, sizeof(char));
     while(c!='\"'){
       cpt++;
@@ -86,7 +87,20 @@ void map_save (char *filename)
       r = read(objects, &c, 1);
       write(fd, &c, 1);
     }
-    lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi (9)
+
+    lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi (9) on en est à la deuxième colone làs
+    cpt = 0;
+    while(c!=9){ //tant que le character lu n'est pas une tabulation
+      read(objects, &c, 1);
+    cpt++;
+    }
+    lseek(objects, cpt*-1, SEEK_SET); //on le remet où il était
+    for(int i =0 ; i<cpt ; ++i){
+      read(objects, &c, 1);
+      write(fd, &c, 1);
+    }
+    lseek(objects, 1, SEEK_SET);
+
     r = read(objects, &c, 1);
     write(fd, &c, 1);
     lseek(objects, 1, SEEK_SET);
