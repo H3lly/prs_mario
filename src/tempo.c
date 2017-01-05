@@ -25,14 +25,30 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
-void *daemon(void *arg){
-/*
-	while(1){
-		sigsuspend();
-	}
-*/
+void handler(int sig){
+  //TODO
 }
 
+
+// daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
+void *daemon(void *arg){
+
+  sigset_t mask;  // masque de blocage de signaux 
+  sigfillset(&mask);  // ajoute tous les signaux possibles au masque
+  sigdelset(&mask, SIGALRM); // retire le signal SIGALRM du masque
+
+  struct sigaction sa; // déclaration d'une structure pour la mise en place du gestionnaire
+  sa.sa_handler = handler; // adresse de la fonction gestionnaire
+  sa.sa_flags = 0; // mise à 0 du champ sa_flags théoriquement ignoré
+  sigemptyset(&sa.sa_mask); // on vide le masque, on ne bloque pas de signaux spécifiques
+  
+  sigaction(SIGALRM, &sa, NULL); // mise en place du gestionnaire pour le signal SIGALRM
+
+  while(1){
+    sigsuspend(&mask); // remplace temporairement le masque de signaux du processus appelant avec le masque fourni et suspend le processus jusqu'à livraison d'un signal SIGALRM
+  }
+  
+}
 
 
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
