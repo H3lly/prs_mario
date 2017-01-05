@@ -29,20 +29,11 @@ for (int y = 0; y < height - 1; y++) {
 
   map_object_begin (6);
 
-  // Texture pour le sol
   map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID);
-  // Mur
   map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID);
-  // Gazon
   map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID);
-  // Marbre
   map_object_add ("images/marble.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_DESTRUCTIBLE);
-
-
-  //fleur
   map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);
-
-  //pieces
   map_object_add("images/coin.png", 20, MAP_OBJECT_AIR | MAP_OBJECT_COLLECTIBLE);
   map_object_end ();
 
@@ -182,15 +173,15 @@ void map_load (char *filename)
   
 int load = open(filename, O_RDONLY);
   unsigned height, width,nb_objects;
-  int r, type;
+  int type;
   
-  r = read(load, &height, sizeof(height));
+  read(load, &height, sizeof(height));
   read(load, &width, sizeof(width));
   read(load, &nb_objects,sizeof(nb_objects));
   map_allocate (width, height);
   for(int y=0; y<height; y++){
     for(int x=0; x<width; x++){
-      r = read(load, &type, sizeof(type));
+      read(load, &type, sizeof(type));
       map_set(x, y, type);
     }
   }
