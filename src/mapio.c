@@ -70,6 +70,7 @@ void map_save (char *filename)
   // ############################################# À VÉRIFIER ##############################################
   char * obj = "util/objets.txt";
   int objects = open(obj, O_RDONLY);
+  int map_blocks = open("map_blocks.save", O_WRONLY | O_CREAT | O_TRUNC, 0666);
   lseek(objects, 1, SEEK_SET);
   int r = 1;
   char c;
@@ -83,37 +84,36 @@ void map_save (char *filename)
       cpt++;
       r = read(objects, &c, sizeof(char));
     }
-    cpt++;
 
-    write(fd, &cpt, sizeof(int));//on écrit dans le fichier de sauvegarde le nombre de caractères
+    write(map_blocks, &cpt, sizeof(int));//on écrit dans le fichier de sauvegarde le nombre de caractères
+    
+    lseek(objects, cpt*-1 - 1, SEEK_CUR); //on reviens à la position avant qu'on compte le nombre de charactere
 
-    lseek(objects, cpt*-1, SEEK_CUR); //on reviens à la position avant qu'on compte le nombre de charactere
-     
-
-    for(int i=0 ; i<cpt-1 ; ++i){ //on ecrit le nom du fichier
+    for(int i=0 ; i<cpt ; ++i){ //on ecrit le nom du fichier
       r = read(objects, &c, 1);
-      printf("FOR c = %c\n", c);
-      write(fd, &c, 1);
+      write(map_blocks, &c, 1);
     }
     
-    //tant que le caractère lu n'est pas entre 0 et 9
-    while(c<48 || c>57){
+    while(c<48 || c>57){ //tant que le caractère lu n'est pas entre 0 et 9
       read(objects, &c, 1);
-      printf("2) c = %c\n", c);
     }
-    exit(1);
+    
+    //CA MARCHE JUSQU'ICI HEIN !!!!
+
     cpt = 0;
     while(c!=9){ //tant que le character lu n'est pas une tabulation
       read(objects, &c, 1);
       cpt++;
     }
-    lseek(objects, cpt*-1, SEEK_CUR); //on le remet où il était
+
+    
+    lseek(objects, cpt*-1 -1, SEEK_CUR); //on le remet où il était
     for(int i =0 ; i<cpt ; ++i){
       read(objects, &c, 1);
-      write(fd, &c, 1);
-    }
-
-
+      printf("FOR c = %c\n", c);
+      write(map_blocks, &c, 1);
+    }    
+    exit(1);
 
     //la on vient d'écrire le nombre de frames. Youhou.
     lseek(objects, 1, SEEK_CUR); //on saute la tabulation
@@ -122,17 +122,17 @@ void map_save (char *filename)
     char tmp = '0';
     if(c=='a'){
       tmp = '0';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
     else{
       read(objects, &c, 1);
       if(c=='e'){
         tmp = '1';
-        write(fd, &tmp, 1);
+        write(map_blocks, &tmp, 1);
       }
       else{
         tmp='2';
-        write(fd, &tmp, 1);
+        write(map_blocks, &tmp, 1);
       }
     }
 
@@ -145,11 +145,11 @@ void map_save (char *filename)
     r = read(objects, &c, 1);
     if(c=='d'){
       tmp='1';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
     else{
       tmp = '0';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
 
     while(c!=9){
@@ -159,11 +159,11 @@ void map_save (char *filename)
     r = read(objects, &c, 1);
     if(c=='c'){
       tmp='1';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
     else{
       tmp = '0';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
 
     while(c!=9){
@@ -173,11 +173,11 @@ void map_save (char *filename)
     r = read(objects, &c, 1);
     if(c=='g'){
       tmp='1';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
     else{
       tmp = '0';
-      write(fd, &tmp, 1);
+      write(map_blocks, &tmp, 1);
     }
 
     if(tmp=='1')
@@ -186,6 +186,7 @@ void map_save (char *filename)
       lseek(objects, 13, SEEK_CUR);
   }
   close(fd);
+  close(map_blocks);
 }
 /*
 AIR = 0
