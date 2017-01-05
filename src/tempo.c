@@ -30,16 +30,25 @@ typedef struct linked_list
   struct itimerval timer; //temporisateur
   void *param;  // sauvegarde de param
   unsigned long time_signal;   // de 0 à 4294967295, correspond au temps où le signal SIGALRM est généré
-  struct linked_list *suiv; // un pointeur vers le prochain event
+  struct linked_list *next; // un pointeur vers le prochain event
 } linked_list;
-/*
-void insert(linked_list **ll)
+
+void insert(linked_list **ll, linked_list **event)
 {
   linked_list *tmp = NULL;
-  linked_list *cll = *ll)
-  
+  linked_list *cll = *ll;
+  while(cll && cll->time_signal < (*event)->time_signal)
+  {
+    tmp = cll;
+    cll = cll->next;
+  }
+  (*event)->next = cll;
+  if(tmp)
+    tmp->next = event;
+  else
+    *ll = event;
 }
-*/
+
 linked_list *first_event = NULL; // création de la liste chaînée
 
 void handler(int sig)
