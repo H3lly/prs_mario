@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 700 // à rajouter sinon error: 'SIG_BLOCK' undeclared...
 #include <SDL.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -24,10 +25,33 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
+void *daemon(void *arg){
+/*
+	while(1){
+		sigsuspend();
+	}
+*/
+}
+
+
+
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-  // TODO
+
+  sigset_t mask;	// masque de blocage de signaux 
+  sigemptyset(&mask);	// création d'un masque vide
+  sigaddset(&mask, SIGALRM);	//on ajoute le signal SIGALRM au masque
+  pthread_sigmask(SIG_BLOCK, &mask, NULL);	// les autres threads crées par timer_init hériteront d'une copie du masque de blocage de signaux
+
+  pthread_t thread; // thread
+
+  if(pthread_create(&thread, NULL, daemon, NULL) == -1){ //création du thread qui exécute la fonction daemon
+  	perror("pthread_create");
+  	return EXIT_FAILURE;
+  }
+  pthread_join(thread, NULL); // attend la fin du thread
+
   return 0; // Implementation not ready
 }
 
