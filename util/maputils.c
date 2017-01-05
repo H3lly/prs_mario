@@ -82,7 +82,10 @@ int main(int argc, char const *argv[])
                 r = read(fd, &height, sizeof(height));
                 r = read(fd, &width, sizeof(width));
                 r = read(fd, &nb_objects,sizeof(nb_objects));
-
+                //agrandissement 
+                if (width>argv[i+1]){
+                    
+                }
             }
             else{
                 perror("Please insert a width.\n");

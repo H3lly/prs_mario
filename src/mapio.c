@@ -65,6 +65,9 @@ void map_save (char *filename)
       write(fd, &data, sizeof(data));
     }
   }
+  int fd2 = open("../util/objets.txt", )
+  
+  
   close(fd);
 }
 
