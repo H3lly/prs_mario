@@ -70,7 +70,6 @@ void map_save (char *filename)
   // ############################################# À VÉRIFIER ##############################################
   char * obj = "util/objets.txt";
   int objects = open(obj, O_RDONLY);
-  assert(objects!=-1, "Le open ne marche pas.");
   lseek(objects, 1, SEEK_SET);
   int r = 1;
   char c;
@@ -79,36 +78,45 @@ void map_save (char *filename)
   while(r >=1){ //tant qu'on est pas à la fin du fichier
     cpt = 0;
     r = read(objects, &c, sizeof(char));
-    while(c!='\"'){
+
+    while(c!='\"'){ //on compte le nombre de caractère que fait le nom du fichier
       cpt++;
       r = read(objects, &c, sizeof(char));
-      assert(r!=-1, "le read ligne 83 ne fonctionne pas.");
     }
-    }/*
-    //cpt--;//vérifier si on est pas décalé ! on en a peut-être pas besoin en fait
-    
-    lseek(objects, cpt*-1, SEEK_SET); //on reviens à la position avant qu'on compte le nombre de charactere
-    write(fd, &cpt, sizeof(int)); 
+    cpt++;
 
-    for(int i=0 ; i<cpt ; ++i){
+    write(fd, &cpt, sizeof(int));//on écrit dans le fichier de sauvegarde le nombre de caractères
+
+    lseek(objects, cpt*-1, SEEK_CUR); //on reviens à la position avant qu'on compte le nombre de charactere
+     
+
+    for(int i=0 ; i<cpt-1 ; ++i){ //on ecrit le nom du fichier
       r = read(objects, &c, 1);
+      printf("FOR c = %c\n", c);
       write(fd, &c, 1);
     }
-
-    lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi. on en est à la deuxième colone làs
+    
+    //tant que le caractère lu n'est pas entre 0 et 9
+    while(c<48 || c>57){
+      read(objects, &c, 1);
+      printf("2) c = %c\n", c);
+    }
+    exit(1);
     cpt = 0;
     while(c!=9){ //tant que le character lu n'est pas une tabulation
       read(objects, &c, 1);
       cpt++;
     }
-    lseek(objects, cpt*-1, SEEK_SET); //on le remet où il était
+    lseek(objects, cpt*-1, SEEK_CUR); //on le remet où il était
     for(int i =0 ; i<cpt ; ++i){
       read(objects, &c, 1);
       write(fd, &c, 1);
     }
 
+
+
     //la on vient d'écrire le nombre de frames. Youhou.
-    lseek(objects, 1, SEEK_SET); //on saute la tabulation
+    lseek(objects, 1, SEEK_CUR); //on saute la tabulation
 
     r = read(objects, &c, 1);
     char tmp = '0';
@@ -131,6 +139,8 @@ void map_save (char *filename)
     while(c!=9){
       read(objects, &c, 1);
     }
+
+
   
     r = read(objects, &c, 1);
     if(c=='d'){
@@ -171,12 +181,10 @@ void map_save (char *filename)
     }
 
     if(tmp=='1')
-      lseek(objects, 9, SEEK_SET);
+      lseek(objects, 9, SEEK_CUR);
     else
-      lseek(objects, 13, SEEK_SET);
+      lseek(objects, 13, SEEK_CUR);
   }
-  */
-  //FAIRE hexdump -c objects.txt
   close(fd);
 }
 /*
