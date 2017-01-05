@@ -33,6 +33,7 @@ typedef struct linked_list
   struct linked_list *next; // un pointeur vers le prochain event
 } linked_list;
 
+// insère l'élèment event dans la liste chaînée ll en tenant compte de l'ordre chronologique de délivrance du signal SIGALRM (time_signal)
 void insert(linked_list **ll, linked_list **event)
 {
   linked_list *tmp = NULL;
@@ -44,9 +45,9 @@ void insert(linked_list **ll, linked_list **event)
   }
   (*event)->next = cll;
   if(tmp)
-    tmp->next = event;
+    tmp->next = (*event);
   else
-    *ll = event;
+    *ll = (*event);
 }
 
 linked_list *first_event = NULL; // création de la liste chaînée
@@ -107,6 +108,8 @@ void timer_set (Uint32 delay, void *param)
   event->param = param;
 
   event->time_signal = get_time() + delay;
+
+  insert(&first_event, &event);
 
   // enclenche le timer
   setitimer(ITIMER_REAL, &(event->timer), NULL);
