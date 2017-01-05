@@ -98,8 +98,6 @@ void map_save (char *filename)
       read(objects, &c, 1);
     }
     
-    //CA MARCHE JUSQU'ICI HEIN !!!!
-    exit(1);
     cpt = 0;
     while(c!=9){ //tant que le character lu n'est pas une tabulation
       read(objects, &c, 1);
@@ -114,82 +112,79 @@ void map_save (char *filename)
     }    
     int n = atoi(str);
     write(map_blocks, &n, sizeof(int));
-    exit(1);
+    
 
     //CA MARCHE JUSQU'ICI HEIN !!!!
 
     //la on vient d'écrire le nombre de frames. Youhou.
-    lseek(objects, 1, SEEK_CUR); //on saute la tabulation
+    
+     while(c!=9) //tant que le character lu n'est pas une tabulation
+      read(objects, &c, 1);
 
-    r = read(objects, &c, 1);
-    char tmp = '0';
+    int tmp = 0;
     if(c=='a'){
-      tmp = '0';
-      write(map_blocks, &tmp, 1);
+      write(map_blocks, &tmp, sizeof(int));
     }
     else{
       read(objects, &c, 1);
       if(c=='e'){
-        tmp = '1';
-        write(map_blocks, &tmp, 1);
+        tmp = 1;
+        write(map_blocks, &tmp, sizeof(int));
       }
       else{
-        tmp='2';
-        write(map_blocks, &tmp, 1);
+        tmp=2;
+        write(map_blocks, &tmp, sizeof(int));
       }
     }
 
-    while(c!=9){
-      read(objects, &c, 1);
-    }
+    
 
+    while(c!=9) //tant que le character lu n'est pas une tabulation
+      read(objects, &c, 1);
 
   
-    r = read(objects, &c, 1);
     if(c=='d'){
-      tmp='1';
-      write(map_blocks, &tmp, 1);
+      tmp=1;
+      write(map_blocks, &tmp, sizeof(int));
     }
     else{
-      tmp = '0';
-      write(map_blocks, &tmp, 1);
+      tmp = 0;
+      write(map_blocks, &tmp, sizeof(int));
     }
-
+    
     while(c!=9){
       read(objects, &c, 1);
     } 
 
-    r = read(objects, &c, 1);
     if(c=='c'){
-      tmp='1';
-      write(map_blocks, &tmp, 1);
+      tmp = 1;
+      write(map_blocks, &tmp, sizeof(int));
     }
     else{
-      tmp = '0';
-      write(map_blocks, &tmp, 1);
+      tmp = 0;
+      write(map_blocks, &tmp, sizeof(int));
     }
 
     while(c!=9){
-      read(objects, &c, 1);
+      r = read(objects, &c, 1);
     }
 
-    r = read(objects, &c, 1);
     if(c=='g'){
-      tmp='1';
-      write(map_blocks, &tmp, 1);
+      tmp=1;
+      write(map_blocks, &tmp, sizeof(int));
     }
     else{
-      tmp = '0';
-      write(map_blocks, &tmp, 1);
+      tmp = 0;
+      write(map_blocks, &tmp, sizeof(int));
     }
 
-    if(tmp=='1')
-      lseek(objects, 9, SEEK_CUR);
-    else
-      lseek(objects, 13, SEEK_CUR);
+    while(c!='\"')
+      r = read(objects, &c, 1);
+    printf("r = %d\n", r);
   }
   close(fd);
   close(map_blocks);
+  exit(1);
 }
 /*
 AIR = 0
