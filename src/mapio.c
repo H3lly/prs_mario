@@ -76,6 +76,7 @@ void map_save (char *filename)
   char c;
   int cpt = 0;
 
+  int line = 0;
   while(r >=1){ //tant qu'on est pas à la fin du fichier
     cpt = 0;
     r = read(objects, &c, sizeof(char));
@@ -99,17 +100,17 @@ void map_save (char *filename)
     }
     
     cpt = 0;
-    while(c!=9){ //tant que le character lu n'est pas une tabulation
+    while(c!=9 && c!=32){ //tant que le character lu n'est pas une tabulation ni un espace
       read(objects, &c, 1);
       cpt++;
     }
 
-    char str[6];
+    char str[6]="";
     lseek(objects, cpt*-1 -1, SEEK_CUR); //on le remet où il était
     for(int i =0 ; i<cpt ; ++i){
       read(objects, &c, 1);
       strncat(str,&c,1);
-    }    
+    }
     int n = atoi(str);
     write(map_blocks, &n, sizeof(int));
     
@@ -168,7 +169,6 @@ void map_save (char *filename)
     while(c!=9){
       r = read(objects, &c, 1);
     }
-
     if(c=='g'){
       tmp=1;
       write(map_blocks, &tmp, sizeof(int));
@@ -177,10 +177,9 @@ void map_save (char *filename)
       tmp = 0;
       write(map_blocks, &tmp, sizeof(int));
     }
-
-    while(c!='\"')
+    while(c!='\"' && r>0){
       r = read(objects, &c, 1);
-    printf("r = %d\n", r);
+    }
   }
   close(fd);
   close(map_blocks);
