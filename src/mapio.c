@@ -88,11 +88,11 @@ void map_save (char *filename)
       write(fd, &c, 1);
     }
 
-    lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi (9) on en est à la deuxième colone làs
+    lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi. on en est à la deuxième colone làs
     cpt = 0;
     while(c!=9){ //tant que le character lu n'est pas une tabulation
       read(objects, &c, 1);
-    cpt++;
+      cpt++;
     }
     lseek(objects, cpt*-1, SEEK_SET); //on le remet où il était
     for(int i =0 ; i<cpt ; ++i){
@@ -120,7 +120,11 @@ void map_save (char *filename)
         write(fd, &tmp, 1);
       }
     }
-    //continuer de lire jusqu'à la tabulation
+
+    while(c!=9){
+      read(objects, &c, 1);
+    }
+  
     r = read(objects, &c, 1);
     if(c=='d'){
       tmp='1';
@@ -130,8 +134,12 @@ void map_save (char *filename)
       tmp = '0';
       write(fd, &tmp, 1);
     }
-    //continuer de lire juqu'à la tabulation
-      r = read(objects, &c, 1);
+
+    while(c!=9){
+      read(objects, &c, 1);
+    } 
+
+    r = read(objects, &c, 1);
     if(c=='c'){
       tmp='1';
       write(fd, &tmp, 1);
@@ -140,8 +148,12 @@ void map_save (char *filename)
       tmp = '0';
       write(fd, &tmp, 1);
     }
-    //continuer jusqu'à la tabulation
-      r = read(objects, &c, 1);
+
+    while(c!=9){
+      read(objects, &c, 1);
+    }
+
+    r = read(objects, &c, 1);
     if(c=='g'){
       tmp='1';
       write(fd, &tmp, 1);
@@ -150,9 +162,13 @@ void map_save (char *filename)
       tmp = '0';
       write(fd, &tmp, 1);
     }
+
+    if(tmp=='1')
+      lseek(objects, 9, SEEK_SET);
+    else
+      lseek(objects, 13, SEEK_SET);
   }
   //FAIRE hexdump -c objects.txt
-  //PRENDRE EN COMTPE QUE LE NOMBRE DE FRAME PEUT ËTRE PLUS LONG LEL !!!!!!!!!!!!!!
   close(fd);
 }
 /*
