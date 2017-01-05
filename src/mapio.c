@@ -68,75 +68,76 @@ void map_save (char *filename)
   // ############################################# À VÉRIFIER ##############################################
   int objects = open("../util/objets.txt", O_RDONLY);
   lseek(objects, 1, SEEK_SET);
+  int r = 1;
   char c;
   int cpt = 0;
-  while(1/*not end of file*/){
-    read(objects, &c, sizeof(char));
+  while(r >=1){ //tant qu'on est pas à la fin du fichier
+    r = read(objects, &c, sizeof(char));
     while(c!='\"'){
       cpt++;
-      read(objects, &c, sizeof(char));
+      r = read(objects, &c, sizeof(char));
     }
-    cpt--;//vérifier si on est pas décalé !
-  }
-  lseek(objects, cpt*-1, SEEK_SET); //vérifier si on est pas décalé !
-  write(fd, &cpt, sizeof(int)); 
+    //cpt--;//vérifier si on est pas décalé ! on en a peut-être pas besoin en fait
+    
+    lseek(objects, cpt*-1, SEEK_SET); //on reviens à la position avant qu'on compte le nombre de charactere
+    write(fd, &cpt, sizeof(int)); 
 
-  for(int i=0 ; i<cpt ; ++i){
-    read(objects, &c, 1);
+    for(int i=0 ; i<cpt ; ++i){
+      r = read(objects, &c, 1);
+      write(fd, &c, 1);
+    }
+    lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi (9)
+    r = read(objects, &c, 1);
     write(fd, &c, 1);
-  }
-  lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi
-  read(objects, &c, 1);
-  write(fd, &c, 1);
-  lseek(objects, 1, SEEK_SET);
-  read(objects, &c, 1);
-  char tmp = '0';
-  if(c=='a'){
-    tmp = '0';
-    write(fd, &tmp, 1);
-  }
-  else{
-    read(objects, &c, 1);
-    if(c=='e'){
-      tmp = '1';
+    lseek(objects, 1, SEEK_SET);
+    r = read(objects, &c, 1);
+    char tmp = '0';
+    if(c=='a'){
+      tmp = '0';
       write(fd, &tmp, 1);
     }
     else{
-      tmp='2';
+      read(objects, &c, 1);
+      if(c=='e'){
+        tmp = '1';
+        write(fd, &tmp, 1);
+      }
+      else{
+        tmp='2';
+        write(fd, &tmp, 1);
+      }
+    }
+    //continuer de lire jusqu'à la tabulation
+    r = read(objects, &c, 1);
+    if(c=='d'){
+      tmp='1';
+      write(fd, &tmp, 1);
+    }
+    else{
+      tmp = '0';
+      write(fd, &tmp, 1);
+    }
+    //continuer de lire juqu'à la tabulation
+      r = read(objects, &c, 1);
+    if(c=='c'){
+      tmp='1';
+      write(fd, &tmp, 1);
+    }
+    else{
+      tmp = '0';
+      write(fd, &tmp, 1);
+    }
+    //continuer jusqu'à la tabulation
+      r = read(objects, &c, 1);
+    if(c=='g'){
+      tmp='1';
+      write(fd, &tmp, 1);
+    }
+    else{
+      tmp = '0';
       write(fd, &tmp, 1);
     }
   }
-  //continuer de lire jusqu'à la tabulation
-  read(objects, &c, 1);
-  if(c=='d'){
-    tmp='1';
-    write(fd, &tmp, 1);
-  }
-  else{
-    tmp = '0';
-    write(fd, &tmp, 1);
-  }
-  //continuer de lire juqu'à la tabulation
-    read(objects, &c, 1);
-  if(c=='c'){
-    tmp='1';
-    write(fd, &tmp, 1);
-  }
-  else{
-    tmp = '0';
-    write(fd, &tmp, 1);
-  }
-  //continuer jusqu'à la tabulation
-    read(objects, &c, 1);
-  if(c=='g'){
-    tmp='1';
-    write(fd, &tmp, 1);
-  }
-  else{
-    tmp = '0';
-    write(fd, &tmp, 1);
-  }
-
   //FAIRE hexdump -c objects.txt
   //PRENDRE EN COMTPE QUE LE NOMBRE DE FRAME PEUT ËTRE PLUS LONG LEL !!!!!!!!!!!!!!
   close(fd);
