@@ -67,11 +67,10 @@ void map_save (char *filename)
   }
   // ############################################# À VÉRIFIER ##############################################
   int objects = open("../util/objets.txt", O_RDONLY);
-  lseek(objects, sizeof(char), SEEK_SET);
+  lseek(objects, 1, SEEK_SET);
   char c;
   int cpt = 0;
   while(1/*not end of file*/){
-    c = 'a';
     read(objects, &c, sizeof(char));
     while(c!='\"'){
       cpt++;
@@ -108,20 +107,35 @@ void map_save (char *filename)
     }
   }
   //continuer de lire jusqu'à la tabulation
-  //si le charactere lu est 'd'
-    //write 1
-  // sinon 
-    //write 0
+  read(objects, &c, 1);
+  if(c=='d'){
+    tmp='1';
+    write(fd, &tmp, 1);
+  }
+  else{
+    tmp = '0';
+    write(fd, &tmp, 1);
+  }
   //continuer de lire juqu'à la tabulation
-  //si le char lu est 'c'
-    //write 1
-  //sinon
-    //write 0
+    read(objects, &c, 1);
+  if(c=='c'){
+    tmp='1';
+    write(fd, &tmp, 1);
+  }
+  else{
+    tmp = '0';
+    write(fd, &tmp, 1);
+  }
   //continuer jusqu'à la tabulation
-  //si le character lu est 'g'
-    //write 1
-  //sinon
-    //write 0
+    read(objects, &c, 1);
+  if(c=='g'){
+    tmp='1';
+    write(fd, &tmp, 1);
+  }
+  else{
+    tmp = '0';
+    write(fd, &tmp, 1);
+  }
 
   //FAIRE hexdump -c objects.txt
   //PRENDRE EN COMTPE QUE LE NOMBRE DE FRAME PEUT ËTRE PLUS LONG LEL !!!!!!!!!!!!!!
@@ -138,14 +152,15 @@ void map_load (char *filename)
   
 int load = open(filename, O_RDONLY);
   unsigned height, width,nb_objects;
-  int type;
-  read(load, &height, sizeof(height));
+  int r, type;
+  
+  r = read(load, &height, sizeof(height));
   read(load, &width, sizeof(width));
   read(load, &nb_objects,sizeof(nb_objects));
   map_allocate (width, height);
   for(int y=0; y<height; y++){
     for(int x=0; x<width; x++){
-      read(load, &type, sizeof(type));
+      r = read(load, &type, sizeof(type));
       map_set(x, y, type);
     }
   }
