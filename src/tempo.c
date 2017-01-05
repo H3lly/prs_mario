@@ -28,12 +28,13 @@ static unsigned long get_time (void)
 void *param_event;
 
 void handler(int sig){
-  printf("L'identité du thread courant est : %d\n", pthread_self());
-  //printf("sdl_push_event(%p) appelée au temps %ld\n", param_event, get_time ());
+  //printf("L'identité du thread courant est : %d\n", pthread_self());  --> pour le 4.1)
+  printf("sdl_push_event(%p) appelée au temps %ld\n", param_event, get_time ());
 }
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
 void *daemon(void *arg){
+  /*  --> pour le 4.1)
   struct itimerval timer;
   // configure le timer pour expirer après 250msec...
   timer.it_value.tv_sec = 0;
@@ -43,6 +44,7 @@ void *daemon(void *arg){
   timer.it_interval.tv_usec = 250000;
   // enclenche le timer
   setitimer(ITIMER_REAL, &timer, NULL);
+  */
 
   sigset_t mask;  // masque de blocage de signaux 
   sigfillset(&mask);  // ajoute tous les signaux possibles au masque
@@ -76,14 +78,12 @@ int timer_init (void)
     perror("pthread_create");
     return EXIT_FAILURE;
   }
-  //pthread_join(thread, NULL); // attend la fin du thread
 
   return 0; // Implementation not ready
 }
 
 void timer_set (Uint32 delay, void *param)
 {
-  /*
   // sauvegarde de param
   param_event = param;
 
@@ -96,7 +96,6 @@ void timer_set (Uint32 delay, void *param)
   timer.it_interval.tv_usec = 0;
   // enclenche le timer
   setitimer(ITIMER_REAL, &timer, NULL);
-  */
 }
 
 #endif
