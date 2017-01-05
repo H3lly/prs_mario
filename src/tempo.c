@@ -26,7 +26,7 @@ static unsigned long get_time (void)
 #ifdef PADAWAN
 
 void handler(int sig){
-  printf("L'identité du thread courant est : %s", pthread_self());
+  printf("L'identité du thread courant est : %d\n", pthread_self());
 }
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
@@ -59,8 +59,6 @@ void *daemon(void *arg){
   }
   
 }
-
-
 
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
