@@ -40,10 +40,30 @@ void set_height(char* filename, unsigned height){
 	write(fd, &height, sizeof(unsigned));
 }
 
-void set_width(char* filename, unsigned width){
+void set_width(char* filename, unsigned new_width){
 	int fd = open(filename, O_WRONLY, 777);
-	lseek(fd, sizeof(unsigned), SEEK_SET);
-	write(fd, &width, sizeof(unsigned));
+	unsigned height, original_width,nb_objects;
+    read(fd, &height, sizeof(height));
+    read(fd, &original_width, sizeof(original_width));
+    read(fd, &nb_objects,sizeof(nb_objects));
+    //lseek(fd, sizeof(unsigned), SEEK_SET);
+	write(fd, &new_width, sizeof(unsigned));
+    int descr[2];
+    pipe(descr);
+    
+    //agrandissement 
+    if (original_width<new_width){
+        for (int i= 0; i<height;i++){
+            //taille d'une ligne du tableau buff;
+            //read(fd, buff, sizeof(buff)) ;
+            //write(decr[1], buff, sizeof(buff));
+            for(int j=0; j<(new_width-original_width); j++){
+                //ajouter case vide
+                int pouet = 0;
+                write(descr[1], pouet, sizeof(pouet));
+            }
+        }
+    }
 }
 
 
@@ -75,17 +95,7 @@ int main(int argc, char const *argv[])
     			++i;
                 unsigned w = atoi(argv[i]);  /* Convert string to int. */
                 set_width(filename, w);
-                int descr[2];
-                pipe(descr);
-                int fd = open(filename, O_WRONLY);
-                unsigned height, width,nb_objects;
-                r = read(fd, &height, sizeof(height));
-                r = read(fd, &width, sizeof(width));
-                r = read(fd, &nb_objects,sizeof(nb_objects));
-                //agrandissement 
-                if (width>argv[i+1]){
-                    
-                }
+                
             }
             else{
                 perror("Please insert a width.\n");
@@ -96,6 +106,7 @@ int main(int argc, char const *argv[])
             	++i; 
                 unsigned h = atoi(argv[i]);
                 set_height(filename, h);
+
             }
             else{
                 perror("Please insert a height.\n");
