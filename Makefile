@@ -13,7 +13,7 @@ DEPENDS := $(SOURCES:src/%.c=deps/%.d)
 
 MAKEFILES := Makefile
 
-CUSTOM_OBJ := obj/mapio.o obj/tempo.o
+CUSTOM_OBJ := obj/mapio.o obj/tempo.o obj/helplib.o
 LIB	:= lib/libgame.a
 
 #CC=gcc

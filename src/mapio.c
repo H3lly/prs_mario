@@ -6,15 +6,11 @@
 
 #include "map.h"
 #include "error.h"
+#include "helplib.h"
 
 #ifdef PADAWAN
 
-void assert(int cond, char * msg){
-  if(!cond){
-    perror(msg);
-    exit(1);
-  }
-}
+
 
 void map_new (unsigned width, unsigned height)
 {
@@ -48,8 +44,6 @@ for (int y = 0; y < height - 1; y++) {
 
 void map_save (char *filename)
 {
-  // TODO
-  /*fprintf (stderr, "Sorry: Map save is not yet implemented\n");*/
   int fd = open(filename,O_CREAT | O_TRUNC | O_WRONLY, 777);
   unsigned height = map_height();
   unsigned width = map_width();
@@ -64,10 +58,7 @@ void map_save (char *filename)
     }
   } 
 
-
-
-  
-  // ############################################# À VÉRIFIER ##############################################
+  //ca c'est pour le type des objets. #génial
   char * obj = "util/objets.txt";
   int objects = open(obj, O_RDONLY);
   int map_blocks = open("maps/map_blocks.save", O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -98,7 +89,7 @@ void map_save (char *filename)
     while(c<48 || c>57){ //tant que le caractère lu n'est pas entre 0 et 9
       read(objects, &c, 1);
     }
-    
+
     cpt = 0;
     while(c!=9 && c!=32){ //tant que le character lu n'est pas une tabulation ni un espace
       read(objects, &c, 1);
@@ -111,15 +102,16 @@ void map_save (char *filename)
       read(objects, &c, 1);
       strncat(str,&c,1);
     }
+
     int n = atoi(str);
     write(map_blocks, &n, sizeof(int));
     
 
-    //CA MARCHE JUSQU'ICI HEIN !!!!
 
     //la on vient d'écrire le nombre de frames. Youhou.
-    
-     while(c!=9) //tant que le character lu n'est pas une tabulation
+    read(objects, &c, 1);
+
+    while(c==9 || c==32)
       read(objects, &c, 1);
 
     int tmp = 0;
@@ -136,14 +128,18 @@ void map_save (char *filename)
         tmp=2;
         write(map_blocks, &tmp, sizeof(int));
       }
+      lseek(objects, -2, SEEK_CUR);
+      read(objects, &c, 1);
+    }
+    
+    while(c!=9 && c!=32){
+      read(objects, &c, 1);
     }
 
-    
-
-    while(c!=9) //tant que le character lu n'est pas une tabulation
+    while(c==9 || c==32){
       read(objects, &c, 1);
+    }
 
-  
     if(c=='d'){
       tmp=1;
       write(map_blocks, &tmp, sizeof(int));
@@ -153,9 +149,12 @@ void map_save (char *filename)
       write(map_blocks, &tmp, sizeof(int));
     }
     
-    while(c!=9){
+    while(c!=9 && c!=32){
       read(objects, &c, 1);
-    } 
+    }
+
+    while(c==9 || c==32)
+      read(objects, &c, 1);
 
     if(c=='c'){
       tmp = 1;
@@ -166,9 +165,13 @@ void map_save (char *filename)
       write(map_blocks, &tmp, sizeof(int));
     }
 
-    while(c!=9){
-      r = read(objects, &c, 1);
+    while(c!=9 && c!=32){
+      read(objects, &c, 1);
     }
+
+    while(c==9 || c==32)
+      read(objects, &c, 1);
+
     if(c=='g'){
       tmp=1;
       write(map_blocks, &tmp, sizeof(int));
@@ -183,13 +186,11 @@ void map_save (char *filename)
   }
   close(fd);
   close(map_blocks);
-  exit(1);
+
+  //ne devrait oas petre là mais on ne peux pas modifier le code pour ajouter une option --testsavemap
+  //je laisse le commentaire là, décommenter pour tester
+  //test_save_map();
 }
-/*
-AIR = 0
-SEMISOLID = 1
-SOLID = 2
-*/
 
 void map_load (char *filename)
 {
