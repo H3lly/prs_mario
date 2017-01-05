@@ -99,11 +99,10 @@ void map_save (char *filename)
       read(objects, &c, 1);
       write(fd, &c, 1);
     }
-    lseek(objects, 1, SEEK_SET);
 
-    r = read(objects, &c, 1);
-    write(fd, &c, 1);
-    lseek(objects, 1, SEEK_SET);
+    //la on vient d'écrire le nombre de frames. Youhou.
+    lseek(objects, 1, SEEK_SET); //on saute la tabulation
+
     r = read(objects, &c, 1);
     char tmp = '0';
     if(c=='a'){
