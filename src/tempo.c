@@ -26,12 +26,22 @@ static unsigned long get_time (void)
 #ifdef PADAWAN
 
 void handler(int sig){
-  //TODO
+  printf("L'identité du thread courant est : %s", pthread_self());
 }
-
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
 void *daemon(void *arg){
+
+  struct itimerval timer;
+  // configure le timer pour expire après 250msec...
+  timer.it_value.tv_sec = 0;
+  timer.it_value.tv_usec = 250000;
+  // ... et toutes les 250 msec
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 250000;
+  // enclenche le timer virtuel
+  setitimer(ITIMER_REAL, &timer, NULL);
+
 
   sigset_t mask;  // masque de blocage de signaux 
   sigfillset(&mask);  // ajoute tous les signaux possibles au masque
@@ -51,20 +61,21 @@ void *daemon(void *arg){
 }
 
 
+
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
 
-  sigset_t mask;	// masque de blocage de signaux 
-  sigemptyset(&mask);	// création d'un masque vide
-  sigaddset(&mask, SIGALRM);	//on ajoute le signal SIGALRM au masque
-  pthread_sigmask(SIG_BLOCK, &mask, NULL);	// les autres threads crées par timer_init hériteront d'une copie du masque de blocage de signaux
+  sigset_t mask;  // masque de blocage de signaux 
+  sigemptyset(&mask); // création d'un masque vide
+  sigaddset(&mask, SIGALRM);  //on ajoute le signal SIGALRM au masque
+  pthread_sigmask(SIG_BLOCK, &mask, NULL);  // les autres threads crées par timer_init hériteront d'une copie du masque de blocage de signaux
 
   pthread_t thread; // thread
 
   if(pthread_create(&thread, NULL, daemon, NULL) == -1){ //création du thread qui exécute la fonction daemon
-  	perror("pthread_create");
-  	return EXIT_FAILURE;
+    perror("pthread_create");
+    return EXIT_FAILURE;
   }
   pthread_join(thread, NULL); // attend la fin du thread
 
