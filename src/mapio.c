@@ -65,25 +65,87 @@ void map_save (char *filename)
       write(fd, &data, sizeof(data));
     }
   }
-  int fd2 = open("../util/objets.txt", )
-  
-  
+  // ############################################# À VÉRIFIER ##############################################
+  int objects = open("../util/objets.txt", O_RDONLY);
+  lseek(objects, sizeof(char), SEEK_SET);
+  char c;
+  int cpt = 0;
+  while(1/*not end of file*/){
+    c = 'a';
+    read(objects, &c, sizeof(char));
+    while(c!='\"'){
+      cpt++;
+      read(objects, &c, sizeof(char));
+    }
+    cpt--;//vérifier si on est pas décalé !
+  }
+  lseek(objects, cpt*-1, SEEK_SET); //vérifier si on est pas décalé !
+  write(fd, &cpt, sizeof(int)); 
+
+  for(int i=0 ; i<cpt ; ++i){
+    read(objects, &c, 1);
+    write(fd, &c, 1);
+  }
+  lseek(objects, 2, SEEK_SET); //faut compter la tabulation aussi
+  read(objects, &c, 1);
+  write(fd, &c, 1);
+  lseek(objects, 1, SEEK_SET);
+  read(objects, &c, 1);
+  char tmp = '0';
+  if(c=='a'){
+    tmp = '0';
+    write(fd, &tmp, 1);
+  }
+  else{
+    read(objects, &c, 1);
+    if(c=='e'){
+      tmp = '1';
+      write(fd, &tmp, 1);
+    }
+    else{
+      tmp='2';
+      write(fd, &tmp, 1);
+    }
+  }
+  //continuer de lire jusqu'à la tabulation
+  //si le charactere lu est 'd'
+    //write 1
+  // sinon 
+    //write 0
+  //continuer de lire juqu'à la tabulation
+  //si le char lu est 'c'
+    //write 1
+  //sinon
+    //write 0
+  //continuer jusqu'à la tabulation
+  //si le character lu est 'g'
+    //write 1
+  //sinon
+    //write 0
+
+  //FAIRE hexdump -c objects.txt
+  //PRENDRE EN COMTPE QUE LE NOMBRE DE FRAME PEUT ËTRE PLUS LONG LEL !!!!!!!!!!!!!!
   close(fd);
 }
+/*
+AIR = 0
+SEMISOLID = 1
+SOLID = 2
+*/
 
 void map_load (char *filename)
 {
   
 int load = open(filename, O_RDONLY);
   unsigned height, width,nb_objects;
-  int r, type;
-  r = read(load, &height, sizeof(height));
-  r = read(load, &width, sizeof(width));
-  r = read(load, &nb_objects,sizeof(nb_objects));
+  int type;
+  read(load, &height, sizeof(height));
+  read(load, &width, sizeof(width));
+  read(load, &nb_objects,sizeof(nb_objects));
   map_allocate (width, height);
   for(int y=0; y<height; y++){
     for(int x=0; x<width; x++){
-      r = read(load, &type, sizeof(type));
+      read(load, &type, sizeof(type));
       map_set(x, y, type);
     }
   }
