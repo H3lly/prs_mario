@@ -70,7 +70,7 @@ void map_save (char *filename)
   // ############################################# À VÉRIFIER ##############################################
   char * obj = "util/objets.txt";
   int objects = open(obj, O_RDONLY);
-  int map_blocks = open("map_blocks.save", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  int map_blocks = open("maps/map_blocks.save", O_WRONLY | O_CREAT | O_TRUNC, 0666);
   lseek(objects, 1, SEEK_SET);
   int r = 1;
   char c;
@@ -99,7 +99,7 @@ void map_save (char *filename)
     }
     
     //CA MARCHE JUSQU'ICI HEIN !!!!
-
+    exit(1);
     cpt = 0;
     while(c!=9){ //tant que le character lu n'est pas une tabulation
       read(objects, &c, 1);
@@ -114,9 +114,10 @@ void map_save (char *filename)
     }    
     int n = atoi(str);
     write(map_blocks, &n, sizeof(int));
+    exit(1);
 
     //CA MARCHE JUSQU'ICI HEIN !!!!
-    
+
     //la on vient d'écrire le nombre de frames. Youhou.
     lseek(objects, 1, SEEK_CUR); //on saute la tabulation
 
