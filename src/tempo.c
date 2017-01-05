@@ -24,7 +24,7 @@ static unsigned long get_time (void)
 }
 
 #ifdef PADAWAN
-
+/*
 void handler(int sig){
   printf("L'identité du thread courant est : %d\n", pthread_self());
 }
@@ -59,11 +59,11 @@ void *daemon(void *arg){
   }
   
 }
-
+*/
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-
+/*
   sigset_t mask;  // masque de blocage de signaux 
   sigemptyset(&mask); // création d'un masque vide
   sigaddset(&mask, SIGALRM);  //on ajoute le signal SIGALRM au masque
@@ -76,13 +76,26 @@ int timer_init (void)
     return EXIT_FAILURE;
   }
   pthread_join(thread, NULL); // attend la fin du thread
-
+*/
   return 0; // Implementation not ready
 }
 
 void timer_set (Uint32 delay, void *param)
 {
+  /*
   // TODO
+  void *param_event
+
+  struct itimerval timer;
+  // configure le timer pour expire après delay msec...
+  timer.it_value.tv_sec = 0;
+  timer.it_value.tv_usec = delay;
+  // ... et toutes les 250 msec
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 0;
+  // enclenche le timer virtuel
+  setitimer(ITIMER_REAL, &timer, NULL);
+  */
 }
 
 #endif
