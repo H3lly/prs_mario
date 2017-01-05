@@ -7,7 +7,6 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <pthread.h>
-
 #include "timer.h"
 
 // Return number of elapsed µsec since... a long time ago
@@ -25,27 +24,24 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
-void *param_event;
+//structure-liste qui va contenir les events
+typedef struct list_events
+{
+  struct itimerval timer; //temporisateur
+  void *param;  // sauvegarde de param
+  unsigned long start_timer;   // de 0 à 4294967295, correspond au temps où le temporisateur est armé
+  struct list_events *suiv; // un pointeur vers le prochain event
+} list_events;
 
-void handler(int sig){
-  //printf("L'identité du thread courant est : %d\n", pthread_self());  --> pour le 4.1)
-  printf("sdl_push_event(%p) appelée au temps %ld\n", param_event, get_time ());
+
+void handler(int sig)
+{
+  //printf("sdl_push_event(%p) appelée au temps %ld\n", param_event, get_time ());
 }
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
-void *daemon(void *arg){
-  /*  --> pour le 4.1)
-  struct itimerval timer;
-  // configure le timer pour expirer après 250msec...
-  timer.it_value.tv_sec = 0;
-  timer.it_value.tv_usec = 250000;
-  // ... et toutes les 250 msec
-  timer.it_interval.tv_sec = 0;
-  timer.it_interval.tv_usec = 250000;
-  // enclenche le timer
-  setitimer(ITIMER_REAL, &timer, NULL);
-  */
-
+void *daemon(void *arg)
+{
   sigset_t mask;  // masque de blocage de signaux 
   sigfillset(&mask);  // ajoute tous les signaux possibles au masque
   sigdelset(&mask, SIGALRM); // retire le signal SIGALRM du masque
@@ -60,13 +56,11 @@ void *daemon(void *arg){
   while(1){
     sigsuspend(&mask); // remplace temporairement le masque de signaux du processus appelant avec le masque fourni et suspend le processus jusqu'à livraison d'un signal SIGALRM
   }
-  
 }
 
 // timer_init returns 1 if timers are fully implemented, 0 otherwise
 int timer_init (void)
 {
-
   sigset_t mask;  // masque de blocage de signaux 
   sigemptyset(&mask); // création d'un masque vide
   sigaddset(&mask, SIGALRM);  //on ajoute le signal SIGALRM au masque
@@ -84,8 +78,6 @@ int timer_init (void)
 
 void timer_set (Uint32 delay, void *param)
 {
-  // sauvegarde de param
-  param_event = param;
 
   struct itimerval timer;
   // configure le timer pour expirer après delay msec...
@@ -99,3 +91,8 @@ void timer_set (Uint32 delay, void *param)
 }
 
 #endif
+
+// Création de la structure-liste : ok !
+// méthodes d'accès, d'insertion, de suppression à implémenter
+// timer_set à modifier en fonction de la structure --> ne pas oublier l'allocation de la structure et de l'ajouter à la liste chaînée
+// création de la liste chainée de base
