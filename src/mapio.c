@@ -154,7 +154,7 @@ void map_save (char *filename)
     while(c<33){
       read(objects, &c, 1);
     }
-    printf("char = %c\n", c);
+
     if(c=='d'){
       tmp=4;
       write(map_blocks, &tmp, sizeof(int));
