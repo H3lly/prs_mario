@@ -10,6 +10,17 @@
 
 #ifdef PADAWAN
 
+#define GROUND_ID 0
+#define WALL_ID 1
+#define GRASS_ID 2 
+#define HERB_ID 3
+#define FLOOR_ID 4
+#define MARBLE_ID 5
+#define MARBLE2_ID 6
+#define COIN_ID 7
+#define QUESTION_ID 8
+#define FLOWER_ID 9
+
 
 
 void map_new (unsigned width, unsigned height)
@@ -17,27 +28,31 @@ void map_new (unsigned width, unsigned height)
   map_allocate (width, height);
 
   for (int x = 0; x < width; x++){
-    map_set (x, height - 1, 0); // Ground
+    map_set (x, height - 1, GROUND_ID); // Ground
     if ( x%4==0 && x!=0)
-      map_set(x,height-2,4); //flower
+      map_set(x,height-2, FLOWER_ID); //flower
     if ( x%6==0 && x!=0)
-      map_set(x,height-3,5); //pieces
+      map_set(x,height-3, COIN_ID); //pieces
   }
 for (int y = 0; y < height - 1; y++) {
-    map_set (0, y, 1); // Wall
-    map_set (width - 1, y, 1); // Wall
+    map_set (0, y, WALL_ID); // Wall
+    map_set (width - 1, y, WALL_ID); // Wall
   }
   
  
 
-  map_object_begin (6);
+  map_object_begin (10);
 
-  map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID);
-  map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID);
-  map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID);
-  map_object_add ("images/marble.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_DESTRUCTIBLE);
-  map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);
-  map_object_add("images/coin.png", 20, MAP_OBJECT_AIR | MAP_OBJECT_COLLECTIBLE);
+  map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_SOLID); //0
+  map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID); //1
+  map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID); //2
+  map_object_add ("images/herb.png", 1, MAP_OBJECT_AIR); //3
+  map_object_add ("images/floor.png", 1, MAP_OBJECT_SEMI_SOLID); //4
+  map_object_add ("images/marble.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_DESTRUCTIBLE); //5
+  map_object_add ("images/marble2.png", 1, MAP_OBJECT_SOLID); //6
+  map_object_add ("images/coin.png", 20, MAP_OBJECT_AIR | MAP_OBJECT_COLLECTIBLE | MAP_OBJECT_DESTRUCTIBLE); //7
+  map_object_add ("images/question.png", 20, MAP_OBJECT_SOLID | MAP_OBJECT_GENERATOR);// 8
+  map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);//9
   map_object_end ();
 
 }
@@ -212,20 +227,19 @@ int load = open(filename, O_RDONLY);
   }
   close(load);
 
-  map_object_begin (6);
+  map_object_begin (10);
 
   // Texture pour le sol
-  map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID);
-  // Mur
-  map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID);
-  // Gazon
-  map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID);
-  // Marbre
-  map_object_add ("images/marble.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_DESTRUCTIBLE);
-  // Fleur
-  map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);
-  // Piece
-  map_object_add ("images/coin.png", 20, MAP_OBJECT_AIR | MAP_OBJECT_COLLECTIBLE);
+  map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_SOLID); //0
+  map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID); //1
+  map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID); //2
+  map_object_add ("images/herb.png", 1, MAP_OBJECT_AIR); //3
+  map_object_add ("images/floor.png", 1, MAP_OBJECT_SEMI_SOLID); //4
+  map_object_add ("images/marble.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_DESTRUCTIBLE); //5
+  map_object_add ("images/marble2.png", 1, MAP_OBJECT_SOLID); //6
+  map_object_add ("images/coin.png", 20, MAP_OBJECT_AIR | MAP_OBJECT_COLLECTIBLE | MAP_OBJECT_DESTRUCTIBLE); //7
+  map_object_add ("images/question.png", 20, MAP_OBJECT_SOLID | MAP_OBJECT_GENERATOR);// 8
+  map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);//9
 
   //exit_with_error ("Map load is not yet implemented\n");
 }
