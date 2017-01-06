@@ -24,6 +24,8 @@ static unsigned long get_time (void)
 
 #ifdef PADAWAN
 
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 //structure-liste qui va contenir les events
 typedef struct linked_list
 {
@@ -50,11 +52,39 @@ void insert(linked_list **ll, linked_list **event)
     *ll = (*event);
 }
 
+// supprime la tête de la liste chaînée
+void pop(linked_list **ll)
+{
+  linked_list *tmp = (*ll)->next;
+  free(*ll);
+  *ll = tmp;
+}
+
 linked_list *first_event = NULL; // création de la liste chaînée
 
 void handler(int sig)
 {
-  //printf("sdl_push_event(%p) appelée au temps %ld\n", param_event, get_time ());
+  //printf("sdl_push_event(%p) appelée au temps %ld\n", first_event->param, get_time ());
+  unsigned long current;
+  unsigned long after;
+  unsigned long diff;
+  if(first_event->next != NULL){
+    current = first_event->time_signal;
+    after = first_event->next->time_signal;
+    diff = after - current;
+  }
+  sdl_push_event (first_event->param);
+  pop(&first_event);
+  if(first_event == NULL)
+    return;
+  if(first_event != NULL){
+    first_event->timer.it_value.tv_sec = diff/1000000;       // secondes
+    first_event->timer.it_value.tv_usec = (diff%1000000);    // microsecondes
+    first_event->timer.it_interval.tv_sec = 0;
+    first_event->timer.it_interval.tv_usec = 0;
+    setitimer(ITIMER_REAL, &(first_event->timer), NULL);
+  }
+
 }
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
@@ -91,33 +121,47 @@ int timer_init (void)
     return EXIT_FAILURE;
   }
 
-  return 0; // Implementation not ready
+  return 1; // Implementation not ready
 }
 
 void timer_set (Uint32 delay, void *param)
 {
   linked_list *event = malloc(sizeof(struct linked_list));  // création de la structure de l'event
-  
+
   // configure le timer pour expirer après delay msec...
-  event->timer.it_value.tv_sec = delay/1000000;       // secondes
-  event->timer.it_value.tv_usec = (delay%1000000);    // microsecondes
+  event->timer.it_value.tv_sec = delay/1000;       // secondes
+  event->timer.it_value.tv_usec = (delay%1000)*1000;    // microsecondes
   // ... et seulement 1 fois
   event->timer.it_interval.tv_sec = 0;
   event->timer.it_interval.tv_usec = 0;
 
   event->param = param;
 
-  event->time_signal = get_time() + delay;
-
+  event->time_signal = get_time() + delay*1000;
+  event->next = NULL;
+  // on ajoute event tout en le triant dans la liste
   insert(&first_event, &event);
 
-  // enclenche le timer
-  setitimer(ITIMER_REAL, &(event->timer), NULL);
+
+  if(event == first_event)
+  {
+    setitimer(ITIMER_REAL, &(first_event->timer), NULL);
+  }
 }
 
 #endif
 
 // Création de la structure-liste : ok !
-// méthodes d'accès, d'insertion, de suppression à implémenter
-// timer_set à modifier en fonction de la structure --> ne pas oublier l'allocation de la structure et de l'ajouter à la liste chaînée
+// méthodes d'accès, d'insertion, de suppression à implémenter : ok
+// timer_set à modifier en fonction de la structure --> ne pas oublier l'allocation de la structure et de l'ajouter à la liste chaînée : ok !
 // création de la liste chainée de base : ok !
+// problème de delay à résoudre !!! : ok !
+
+      /*
+      struct itimerval timer;
+      unsigned int delay = first_event->next->time_signal - first_event->time_signal; 
+      timer.it_value.tv_sec = delay/1000;       // secondes
+      timer.it_value.tv_usec = (delay%1000)*1000;    // microsecondes
+      timer.it_interval.tv_sec = 0;
+      timer.it_interval.tv_usec = 0;
+      setitimer(ITIMER_REAL, &timer, NULL);*/
