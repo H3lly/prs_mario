@@ -87,7 +87,11 @@ void handler(int sig)
       first_event->timer.it_value.tv_usec = (diff%1000000);
       first_event->timer.it_interval.tv_sec = 0;
       first_event->timer.it_interval.tv_usec = 0;
-      setitimer(ITIMER_REAL, &(first_event->timer), NULL);
+      if(setitimer(ITIMER_REAL, &(first_event->timer), NULL) == -1)
+      {
+        perror("setitimer handler");
+        exit(1);
+      }
     }
     else
     {
@@ -170,7 +174,11 @@ void timer_set (Uint32 delay, void *param)
 
   if(event == first_event)
   {
-    setitimer(ITIMER_REAL, &(first_event->timer), NULL);
+    if(setitimer(ITIMER_REAL, &(first_event->timer), NULL) == -1)
+    {
+      perror("setitimer timer_set");
+      exit(1);
+    }
   }
 
   // Fin de la protection des accès aux structures de données partagées
