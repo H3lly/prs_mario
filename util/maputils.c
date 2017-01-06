@@ -8,14 +8,14 @@
 
 
 
-unsigned get_height(char* filename){
+unsigned get_height(const char* filename){
 	int fd = open(filename, O_RDONLY);
 	unsigned height = 0;
 	int r = read(fd, &height, sizeof(unsigned));
 	return height;
 }
 
-unsigned get_width(char* filename){
+unsigned get_width(const char* filename){
 	int fd = open(filename, O_RDONLY);
 	unsigned width = 0;
 	lseek(fd, sizeof(unsigned), SEEK_SET);
@@ -23,7 +23,7 @@ unsigned get_width(char* filename){
 	return width;
 }
 
-unsigned get_objects(char* filename){
+unsigned get_objects(const char* filename){
 	int fd = open(filename, O_RDONLY);
 	unsigned objects = 0;
 	lseek(fd, 2*sizeof(unsigned), SEEK_SET);
@@ -31,39 +31,115 @@ unsigned get_objects(char* filename){
 	return objects;
 }
 
-void get_info(char* filename){
-	printf("Height : %u, Width : %u, Objects : %u.\n", get_height(filename), get_width(filename), get_objects(filename));
+void get_info(const char* filename){
 }
 
-void set_height(char* filename, unsigned height){
-	int fd = open(filename, O_WRONLY, 777);
-	write(fd, &height, sizeof(unsigned));
-}
-
-void set_width(char* filename, unsigned new_width){
-	int fd = open(filename, O_WRONLY, 777);
-	unsigned height, original_width,nb_objects;
-    read(fd, &height, sizeof(height));
-    read(fd, &original_width, sizeof(original_width));
-    read(fd, &nb_objects,sizeof(nb_objects));
-    //lseek(fd, sizeof(unsigned), SEEK_SET);
-	write(fd, &new_width, sizeof(unsigned));
+void set_height(const char* filename, unsigned new_height){
+    int fd = open(filename, O_RDWR, 777);
+    unsigned original_height=0;
+    unsigned original_width=0;
+    unsigned nb_objects = 0;
+    read(fd, &original_height, sizeof(unsigned));
+    read(fd, &original_width, sizeof(unsigned));
+    read(fd, &nb_objects,sizeof(unsigned));
     int descr[2];
     pipe(descr);
-    
     //agrandissement 
-    if (original_width<new_width){
-        for (int i= 0; i<height;i++){
-            //taille d'une ligne du tableau buff;
-            //read(fd, buff, sizeof(buff)) ;
-            //write(decr[1], buff, sizeof(buff));
-            for(int j=0; j<(new_width-original_width); j++){
-                //ajouter case vide
-                int pouet = 0;
-                write(descr[1], pouet, sizeof(pouet));
-            }
+    for(int j = 0; j < (int) (new_height - original_height); j++){
+        //ajouter case vide
+        int buff = -1;
+        for (int i =0; i < original_width; i++)
+        {
+            write(descr[1], &buff, sizeof(buff));
         }
     }
+    int kept_height;
+    if (original_height > new_height) {
+        kept_height = new_height;
+    } else {
+        kept_height = original_height;
+    }
+    lseek(fd, (original_height - kept_height) * original_width * sizeof(int), SEEK_CUR);
+    for (int i = 0; i < kept_height; i++){
+        //taille d'une ligne du tableau buff;
+        //read(fd, buff, sizeof(buff)) ;
+        //write(decr[1], buff, sizeof(buff));
+        int buffer;
+        for (int i =0; i < original_width; i++)
+        {
+            read(fd, &buffer, sizeof(int));
+            write(descr[1], &buffer, sizeof(buffer));
+        }
+    }
+    lseek(fd,0, SEEK_SET);
+    write(fd,&new_height, sizeof(new_height));
+    write(fd,&original_width,sizeof(original_width));
+    write(fd,&nb_objects, sizeof(nb_objects));
+    
+    int buffer2;
+    for (int i = 0; i < (int) (new_height * original_width); i++)
+    {
+        read(descr[0], &buffer2, sizeof(int));
+        write(fd, &buffer2, sizeof(int));
+    }
+    close(descr[0]);
+    close(descr[1]);
+    close(fd);
+}
+
+void set_width(const char* filename, unsigned new_width){
+    int fd = open(filename, O_RDWR, 777);
+    unsigned original_height=0;
+    unsigned original_width=0;
+    unsigned nb_objects = 0;
+    read(fd, &original_height, sizeof(unsigned));
+    read(fd, &original_width, sizeof(unsigned));
+    read(fd, &nb_objects,sizeof(unsigned));
+    int descr[2];
+    pipe(descr);
+    //agrandissement 
+    for (int i= 0; i<original_height;i++){
+        //taille d'une ligne du tableau buff;
+        //read(fd, buff, sizeof(buff)) ;
+        //write(decr[1], buff, sizeof(buff));
+        int kept_width;
+        if (original_width > new_width) {
+            kept_width = new_width;
+        } else {
+            kept_width = original_width;
+        }
+
+        int buffer;
+        for (int i = 0; i < kept_width; i++)
+        {
+            read(fd, &buffer, sizeof(int));
+            write(descr[1], &buffer, sizeof(buffer));
+        }
+        lseek(fd, (original_width - kept_width) * sizeof(int), SEEK_CUR);
+        
+        for(int j = 0; j < (int) (new_width - original_width); j++){
+            //ajouter case vide
+            int buff = -1;
+            write(descr[1], &buff, sizeof(buff));
+        }
+    }
+    lseek(fd,0, SEEK_SET);
+    write(fd,&original_height, sizeof(original_height));
+    write(fd,&new_width,sizeof(new_width));
+    write(fd,&nb_objects, sizeof(nb_objects));
+    
+    int buffer2;
+    for (int i = 0; i < original_height * new_width; i++)
+    {
+        read(descr[0], &buffer2, sizeof(int));
+        write(fd, &buffer2, sizeof(int));
+    }
+    close(descr[0]);
+    close(descr[1]);
+    close(fd);}
+
+void set_map(const char* filename, unsigned new_width, unsigned new_height){
+
 }
 
 
@@ -74,7 +150,7 @@ int main(int argc, char const *argv[])
 		perror("not enough parameters\n");
 		exit(1);
 	}	
-	char * filename = argv[1];
+	const char * filename = argv[1];
 
 	/*12 32 1*/
     for (int i = 1; i < argc; i++){  /* Skip argv[0] (program name). */
@@ -91,23 +167,21 @@ int main(int argc, char const *argv[])
             get_info(filename);
         }
         else if (strcmp(argv[i], "--setwidth") == 0){  /* Process optional arguments. */
-            if (i + 1 <= argc - 1){  /* There are enough arguments in argv. */
-    			++i;
+            if (i + 1 < argc){  /* There are enough arguments in argv. */
+                ++i;
                 unsigned w = atoi(argv[i]);  /* Convert string to int. */
                 set_width(filename, w);
-                
             }
             else{
                 perror("Please insert a width.\n");
             }
         }
         else if (strcmp(argv[i], "--setheight") == 0){  
-            if (i + 1 <= argc - 1){ 
-            	++i; 
+            if (i + 1 < argc){ 
+            	++i;
                 unsigned h = atoi(argv[i]);
                 set_height(filename, h);
-
-            }
+            }  
             else{
                 perror("Please insert a height.\n");
             }
