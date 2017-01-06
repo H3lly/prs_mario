@@ -143,6 +143,27 @@ void set_map(const char* filename, unsigned new_width, unsigned new_height){
 
 }
 
+void set_objects(char * savefile, int nb_frames, int solidity, int destructible, int collectible, int generator){
+//./util/maputil maps/saved.map --setobjects "images/ground.png" 1 solid
+//not-destructible not-collectible not-generator "images/wall.png" 1
+//solid not-destructible not-collectible not-generator
+    int fd = open("maps/map_blocks.save", O_RDONLY);
+    int n, r;
+    while(1){
+        r = read(fd, &n, sizeof(int));
+        if(r==0)
+            break;
+        char filename[n];
+        read(fd, &filename, n);
+        if(filename==savefile){
+
+        }
+        else {
+            perror("No such object(s).");
+        }
+    }
+}
+
 
 /*fichier passé en argument*/
 int main(int argc, char const *argv[])
@@ -188,19 +209,20 @@ int main(int argc, char const *argv[])
             }
         }
         /*else if (strcmp(argv[i], "--setobjects") == 0){  
-            if (i + 6 <= argc - 1 ET AUTRE TRUCS){
+            ECRIRE LE FOR I IN ARGC
+            if (i + 6 < argc){
             	++i;  
                 char* file = argv[i];
                 ++i;
-                int nb_frames = argv[i];
+                int nb_frames = atoi(argv[i]);
                 ++i;
-                int solidity = argv[i];
+                int solidity = atoi(argv[i]);
                 ++i;
-                int destructible = argv[i];
+                int destructible = atoi(argv[i]);
                 ++i;
-                int collectible = argv[i];
+                int collectible = atoi(argv[i]);
                 ++i;
-                int generator = argv[i];
+                int generator = atoi(argv[i]);
                 set_objects(file, nb_frames, solidity, destructible, collectible, generator);
             }
             else{
@@ -213,7 +235,6 @@ int main(int argc, char const *argv[])
 }
 
 /*
-set_objects(file, nb_frames, solidity, destructible, collectible, generator)
 prune_objects()
 
 */
