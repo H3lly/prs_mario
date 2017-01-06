@@ -144,9 +144,9 @@ void set_map(const char* filename, unsigned new_width, unsigned new_height){
 }
 
 void set_objects(char * savefile, int nb_frames, int solidity, int destructible, int collectible, int generator){
-//./util/maputil maps/saved.map --setobjects "images/ground.png" 1 solid
-//not-destructible not-collectible not-generator "images/wall.png" 1
-//solid not-destructible not-collectible not-generator
+//./util/maputil maps/saved.map --setobjects "images/ground.png" 1 solid ot-destructible not-collectible not-generator 
+//"images/wall.png" 1 solid not-destructible not-collectible not-generator
+//
     int fd = open("maps/map_blocks.save", O_RDONLY);
     int n, r;
     while(1){
@@ -156,7 +156,16 @@ void set_objects(char * savefile, int nb_frames, int solidity, int destructible,
         char filename[n];
         read(fd, &filename, n);
         if(filename==savefile){
-
+            n = nb_frames;
+            write(fd, &n, sizeof(int));
+            n = solidity;
+            write(fd, &n, sizeof(int));
+            n = destructible;
+            write(fd, &n, sizeof(int));
+            n = collectible;
+            write(fd, &n, sizeof(int));
+            n = generator;
+            write(fd, &n, sizeof(int));
         }
         else {
             perror("No such object(s).");
@@ -207,6 +216,9 @@ int main(int argc, char const *argv[])
             else{
                 perror("Please insert a height.\n");
             }
+        }
+        else if (strcmp(argv[i], "--setobjects") == 0){ 
+            set_objects("images/coin.png", 20, 0, 0, 0, 0)
         }
         /*else if (strcmp(argv[i], "--setobjects") == 0){  
             ECRIRE LE FOR I IN ARGC
