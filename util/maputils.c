@@ -32,6 +32,7 @@ unsigned get_objects(const char* filename){
 }
 
 void get_info(const char* filename){
+    printf("height = %u, width = %u, objects = %u\n", get_height(filename),get_width(filename), get_objects(filename));
 }
 
 void set_height(const char* filename, unsigned new_height){
