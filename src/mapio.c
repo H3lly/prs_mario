@@ -59,7 +59,7 @@ for (int y = 0; y < height - 1; y++) {
 
 void map_save (char *filename)
 {
-  int fd = open(filename,O_CREAT | O_TRUNC | O_WRONLY, 777);
+  int fd = open(filename,O_CREAT | O_TRUNC | O_WRONLY, 0666);
   unsigned height = map_height();
   unsigned width = map_width();
   unsigned nb_objects = map_objects();
@@ -87,7 +87,7 @@ void map_save (char *filename)
     cpt = 0;
     r = read(objects, &c, sizeof(char));
 
-    while(c!='\"'){ //on compte le nombre de caractère que fait le nom du fichier
+    while(c>34){ //on compte le nombre de caractère que fait le nom du fichier
       cpt++;
       r = read(objects, &c, sizeof(char));
     }
@@ -106,7 +106,7 @@ void map_save (char *filename)
     }
 
     cpt = 0;
-    while(c!=9 && c!=32){ //tant que le character lu n'est pas une tabulation ni un espace
+    while(c>34){ //tant que le character lu n'est pas une tabulation ni un espace
       read(objects, &c, 1);
       cpt++;
     }
@@ -126,7 +126,7 @@ void map_save (char *filename)
     //la on vient d'écrire le nombre de frames. Youhou.
     read(objects, &c, 1);
 
-    while(c==9 || c==32)
+    while(c<33)
       read(objects, &c, 1);
 
     int tmp = 0;
@@ -147,16 +147,16 @@ void map_save (char *filename)
       read(objects, &c, 1);
     }
     
-    while(c!=9 && c!=32){
+    while(c>34){
       read(objects, &c, 1);
     }
 
-    while(c==9 || c==32){
+    while(c<33){
       read(objects, &c, 1);
     }
-
+    printf("char = %c\n", c);
     if(c=='d'){
-      tmp=1;
+      tmp=4;
       write(map_blocks, &tmp, sizeof(int));
     }
     else{
@@ -164,15 +164,15 @@ void map_save (char *filename)
       write(map_blocks, &tmp, sizeof(int));
     }
     
-    while(c!=9 && c!=32){
+    while(c>34){
       read(objects, &c, 1);
     }
 
-    while(c==9 || c==32)
+    while(c<33)
       read(objects, &c, 1);
 
     if(c=='c'){
-      tmp = 1;
+      tmp = 8;
       write(map_blocks, &tmp, sizeof(int));
     }
     else{
@@ -180,15 +180,15 @@ void map_save (char *filename)
       write(map_blocks, &tmp, sizeof(int));
     }
 
-    while(c!=9 && c!=32){
+    while(c>34){
       read(objects, &c, 1);
     }
 
-    while(c==9 || c==32)
+    while(c<33)
       read(objects, &c, 1);
 
     if(c=='g'){
-      tmp=1;
+      tmp=16;
       write(map_blocks, &tmp, sizeof(int));
     }
     else{
@@ -227,8 +227,40 @@ int load = open(filename, O_RDONLY);
   }
   close(load);
 
-  map_object_begin (10);
 
+  int objects = open("maps/map_blocks.save", O_RDONLY);
+  int n, frames, solidity, destructible, collectible, generator;
+  map_object_begin (10);
+  int cpt = 0;
+  while(1){
+    int r = read(objects, &n, sizeof(int));
+    if(r==0)
+      break;
+    char filename[n];
+    read(objects, &filename, n);
+    printf("n=%d ", n);
+    read(objects, &frames, sizeof(int));
+    read(objects, &solidity, sizeof(int));
+    read(objects, &destructible, sizeof(int));
+    if(destructible==0)
+      destructible = solidity;
+    read(objects, &collectible, sizeof(int));
+    if(collectible==0)
+      collectible = solidity;
+    read(objects, &generator, sizeof(int));
+    if(generator==0)
+      generator = solidity;
+    if(cpt==2)
+      map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID);
+    else if(cpt==4)
+      map_object_add ("images/floor.png", 1, MAP_OBJECT_SEMI_SOLID);
+    else
+      map_object_add(filename, frames, solidity | destructible | collectible | generator); 
+    cpt++;
+  }
+
+  
+/*
   // Texture pour le sol
   map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID | MAP_OBJECT_SOLID); //0
   map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID); //1
@@ -241,7 +273,7 @@ int load = open(filename, O_RDONLY);
   map_object_add ("images/question.png", 20, MAP_OBJECT_SOLID | MAP_OBJECT_GENERATOR);// 8
   map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);//9
 
-  //exit_with_error ("Map load is not yet implemented\n");
+  */
 }
 
 #endif
