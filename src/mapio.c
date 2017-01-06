@@ -185,6 +185,7 @@ void map_save (char *filename)
     }
   }
   close(fd);
+  close(objects);
   close(map_blocks);
 
   //ne devrait oas petre là mais on ne peux pas modifier le code pour ajouter une option --testsavemap
