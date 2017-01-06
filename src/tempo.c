@@ -65,27 +65,34 @@ linked_list *first_event = NULL; // création de la liste chaînée
 void handler(int sig)
 {
   //printf("sdl_push_event(%p) appelée au temps %ld\n", first_event->param, get_time ());
-  unsigned long current;
-  unsigned long after;
-  unsigned long diff;
-  if(first_event->next != NULL){
-    current = first_event->time_signal;
-    after = first_event->next->time_signal;
-    diff = after - current;
+  
+  if(first_event->next != NULL)
+  {
+    unsigned long current = first_event->time_signal;
+    unsigned long after = first_event->next->time_signal;
+    unsigned long diff = after - current;
+    sdl_push_event (first_event->param);
+    pop(&first_event);
+    if(first_event != NULL)
+    {
+      first_event->timer.it_value.tv_sec = diff/1000000;       // secondes
+      first_event->timer.it_value.tv_usec = (diff%1000000);    // microsecondes
+      first_event->timer.it_interval.tv_sec = 0;
+      first_event->timer.it_interval.tv_usec = 0;
+      setitimer(ITIMER_REAL, &(first_event->timer), NULL);
+    }
+    else
+    {
+      return;
+    }
   }
-  sdl_push_event (first_event->param);
-  pop(&first_event);
-  if(first_event == NULL)
-    return;
-  if(first_event != NULL){
-    first_event->timer.it_value.tv_sec = diff/1000000;       // secondes
-    first_event->timer.it_value.tv_usec = (diff%1000000);    // microsecondes
-    first_event->timer.it_interval.tv_sec = 0;
-    first_event->timer.it_interval.tv_usec = 0;
-    setitimer(ITIMER_REAL, &(first_event->timer), NULL);
+  else
+  {
+      sdl_push_event (first_event->param);
+      pop(&first_event);
   }
-
 }
+
 
 // daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
 void *daemon(void *arg)
@@ -150,18 +157,3 @@ void timer_set (Uint32 delay, void *param)
 }
 
 #endif
-
-// Création de la structure-liste : ok !
-// méthodes d'accès, d'insertion, de suppression à implémenter : ok
-// timer_set à modifier en fonction de la structure --> ne pas oublier l'allocation de la structure et de l'ajouter à la liste chaînée : ok !
-// création de la liste chainée de base : ok !
-// problème de delay à résoudre !!! : ok !
-
-      /*
-      struct itimerval timer;
-      unsigned int delay = first_event->next->time_signal - first_event->time_signal; 
-      timer.it_value.tv_sec = delay/1000;       // secondes
-      timer.it_value.tv_usec = (delay%1000)*1000;    // microsecondes
-      timer.it_interval.tv_sec = 0;
-      timer.it_interval.tv_usec = 0;
-      setitimer(ITIMER_REAL, &timer, NULL);*/
