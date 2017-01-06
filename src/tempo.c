@@ -1,4 +1,4 @@
-#define _XOPEN_SOURCE 700 // à rajouter sinon error: 'SIG_BLOCK' undeclared...
+#define _XOPEN_SOURCE 700
 #include <SDL.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -9,14 +9,14 @@
 #include <pthread.h>
 #include "timer.h"
 
-// Return number of elapsed µsec since... a long time ago
+// Retourne le nombre de µsec écoulées depuis... un bon moment
 static unsigned long get_time (void)
 {
   struct timeval tv;
 
   gettimeofday (&tv ,NULL);
 
-  // Only count seconds since beginning of 2016 (not jan 1st, 1970)
+  // Compte seulement les secondes depuis début 2016 (pas le 1er janvier 1970)
   tv.tv_sec -= 3600UL * 24 * 365 * 46;
   
   return tv.tv_sec * 1000000UL + tv.tv_usec;
@@ -26,16 +26,19 @@ static unsigned long get_time (void)
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-//structure-liste qui va contenir les events
+// Structure de la liste d'évènements
 typedef struct linked_list
 {
-  struct itimerval timer; //temporisateur
-  void *param;  // sauvegarde de param
-  unsigned long time_signal;   // de 0 à 4294967295, correspond au temps où le signal SIGALRM est généré
-  struct linked_list *next; // un pointeur vers le prochain event
+  struct itimerval timer;
+  void *param;
+  unsigned long time_signal;
+  struct linked_list *next;
 } linked_list;
 
-// insère l'élèment event dans la liste chaînée ll en tenant compte de l'ordre chronologique de délivrance du signal SIGALRM (time_signal)
+/*
+Insère un évènement event dans la liste ll en le triant dans l'ordre
+chronologique de délivrance du signal
+*/
 void insert(linked_list **ll, linked_list **event)
 {
   linked_list *tmp = NULL;
@@ -52,7 +55,7 @@ void insert(linked_list **ll, linked_list **event)
     *ll = (*event);
 }
 
-// supprime la tête de la liste chaînée
+// Supprime le premier élément de la liste, le deuxième devient premier
 void pop(linked_list **ll)
 {
   linked_list *tmp = (*ll)->next;
@@ -60,12 +63,17 @@ void pop(linked_list **ll)
   *ll = tmp;
 }
 
-linked_list *first_event = NULL; // création de la liste chaînée
+// Création de la liste nulle d'évènements
+linked_list *first_event = NULL;
 
+// Gestionnaire des signaux SIGALRM
 void handler(int sig)
 {
-  //printf("sdl_push_event(%p) appelée au temps %ld\n", first_event->param, get_time ());
-  
+  // Protection des accès aux structures de données partagées
+  pthread_mutex_lock(&mutex);
+
+  /* Si un évènement suit le premier évènement de la liste, on déclenche
+     le premier évènement et on arme un temporisateur pour le deuxième */
   if(first_event->next != NULL)
   {
     unsigned long current = first_event->time_signal;
@@ -75,8 +83,8 @@ void handler(int sig)
     pop(&first_event);
     if(first_event != NULL)
     {
-      first_event->timer.it_value.tv_sec = diff/1000000;       // secondes
-      first_event->timer.it_value.tv_usec = (diff%1000000);    // microsecondes
+      first_event->timer.it_value.tv_sec = diff/1000000;
+      first_event->timer.it_value.tv_usec = (diff%1000000);
       first_event->timer.it_interval.tv_sec = 0;
       first_event->timer.it_interval.tv_usec = 0;
       setitimer(ITIMER_REAL, &(first_event->timer), NULL);
@@ -91,69 +99,82 @@ void handler(int sig)
       sdl_push_event (first_event->param);
       pop(&first_event);
   }
+
+  // Fin de la protection des accès aux structures de données partagées
+  pthread_mutex_unlock(&mutex);
 }
 
-
-// daemon va attendre les signaux SIGALRM (signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée) et gérer les évènements
+/*
+Gestionnaire qui va attendre les signaux SIGALRM
+(signaux envoyés à un processus lorsqu'une limite de temps s'est écoulée)
+et gérer les évènements
+*/
 void *daemon(void *arg)
 {
-  sigset_t mask;  // masque de blocage de signaux 
-  sigfillset(&mask);  // ajoute tous les signaux possibles au masque
-  sigdelset(&mask, SIGALRM); // retire le signal SIGALRM du masque
+  sigset_t mask; 
+  sigfillset(&mask);
+  sigdelset(&mask, SIGALRM);
 
-  struct sigaction sa; // déclaration d'une structure pour la mise en place du gestionnaire
-  sa.sa_handler = handler; // adresse de la fonction gestionnaire
-  sa.sa_flags = 0; // mise à 0 du champ sa_flags théoriquement ignoré
-  sigemptyset(&sa.sa_mask); // on vide le masque, on ne bloque pas de signaux spécifiques
+  struct sigaction sa;
+  sa.sa_handler = handler;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
   
-  sigaction(SIGALRM, &sa, NULL); // mise en place du gestionnaire pour le signal SIGALRM
+  sigaction(SIGALRM, &sa, NULL);
 
-  while(1){
-    sigsuspend(&mask); // remplace temporairement le masque de signaux du processus appelant avec le masque fourni et suspend le processus jusqu'à livraison d'un signal SIGALRM
+  while(1)
+  {
+    sigsuspend(&mask);
   }
 }
 
-// timer_init returns 1 if timers are fully implemented, 0 otherwise
+// Retourne 1 si les temporisateurs sont complètement implémentés, 0 sinon
 int timer_init (void)
 {
-  sigset_t mask;  // masque de blocage de signaux 
-  sigemptyset(&mask); // création d'un masque vide
-  sigaddset(&mask, SIGALRM);  //on ajoute le signal SIGALRM au masque
-  pthread_sigmask(SIG_BLOCK, &mask, NULL);  // les autres threads crées par timer_init hériteront d'une copie du masque de blocage de signaux
+  sigset_t mask; 
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGALRM);
+  pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
-  pthread_t thread; // thread
+  pthread_t thread;
 
-  if(pthread_create(&thread, NULL, daemon, NULL) == -1){ //création du thread qui exécute la fonction daemon
+  if(pthread_create(&thread, NULL, daemon, NULL) == -1)
+  {
     perror("pthread_create");
     return EXIT_FAILURE;
   }
 
-  return 1; // Implementation not ready
+  return 1;
 }
 
+// Arme un temporisateur
 void timer_set (Uint32 delay, void *param)
 {
-  linked_list *event = malloc(sizeof(struct linked_list));  // création de la structure de l'event
+  linked_list *event = malloc(sizeof(struct linked_list));
 
-  // configure le timer pour expirer après delay msec...
-  event->timer.it_value.tv_sec = delay/1000;       // secondes
-  event->timer.it_value.tv_usec = (delay%1000)*1000;    // microsecondes
-  // ... et seulement 1 fois
+  // Protection des accès aux structures de données partagées
+  pthread_mutex_lock(&mutex);
+
+  event->timer.it_value.tv_sec = delay/1000;
+  event->timer.it_value.tv_usec = (delay%1000)*1000;
   event->timer.it_interval.tv_sec = 0;
   event->timer.it_interval.tv_usec = 0;
 
   event->param = param;
 
   event->time_signal = get_time() + delay*1000;
-  event->next = NULL;
-  // on ajoute event tout en le triant dans la liste
-  insert(&first_event, &event);
 
+  event->next = NULL;
+
+  insert(&first_event, &event);
 
   if(event == first_event)
   {
     setitimer(ITIMER_REAL, &(first_event->timer), NULL);
   }
+
+  // Fin de la protection des accès aux structures de données partagées
+  pthread_mutex_unlock(&mutex);
 }
 
 #endif
